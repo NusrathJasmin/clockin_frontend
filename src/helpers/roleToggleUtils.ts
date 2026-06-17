@@ -1,5 +1,9 @@
 const ROLE_TOGGLE_TYPES = new Set(['Admin', 'Manager', 'HR']);
 const USER_HOME_PATH = '/leave-requests';
+export const PLATFORM_ADMIN_HOME_PATH = '/registrations';
+export const PLATFORM_ADMIN_ROUTE_ROLE = 'platform_admin';
+
+type UserDataInput = { is_platform_admin?: boolean; user_type?: UserTypeInput } | null | undefined;
 
 type UserTypeInput =
 	| string
@@ -24,8 +28,14 @@ export const isSelfEquivalentMode = (userType: UserTypeInput, mode: string): boo
 
 export const getUserHomePath = (): string => USER_HOME_PATH;
 
+export const isPlatformAdmin = (userData: UserDataInput): boolean =>
+	userData?.is_platform_admin === true;
+
 export const getHomePathForUserType = (userType: UserTypeInput): string =>
 	isUserRole(userType) ? USER_HOME_PATH : '/';
+
+export const getHomePathForUser = (userData: UserDataInput): string =>
+	isPlatformAdmin(userData) ? PLATFORM_ADMIN_HOME_PATH : getHomePathForUserType(userData?.user_type);
 
 export const canUseRoleToggle = (userType: UserTypeInput): boolean =>
 	ROLE_TOGGLE_TYPES.has(resolveUserTypeString(userType));
@@ -43,7 +53,11 @@ export const getPrivilegedToggleLabel = (userType: UserTypeInput): string => {
 export const getEffectiveUserTypeForRoutes = (
 	userType: UserTypeInput,
 	mode: string,
+	userData?: UserDataInput,
 ): string | null | undefined => {
+	if (isPlatformAdmin(userData)) {
+		return PLATFORM_ADMIN_ROUTE_ROLE;
+	}
 	if (isSelfEquivalentMode(userType, mode)) {
 		return 'user';
 	}

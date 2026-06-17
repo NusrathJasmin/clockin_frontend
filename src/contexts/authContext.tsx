@@ -22,6 +22,13 @@ interface IAuthContextProviderProps {
 
 
 
+const isPublicAuthPath = (pathname: string) =>
+	pathname.includes('public') ||
+	pathname === '/login' ||
+	pathname === '/admin/login' ||
+	pathname === '/forgotpassword' ||
+	pathname === '/set-password';
+
 export const AuthContextProvider: FC<IAuthContextProviderProps> = ({ children }) => {
 	const [user, setUser] = useState<string>('');
 	const [userData, setUserData] = useState<null | any>(null);
@@ -30,15 +37,17 @@ export const AuthContextProvider: FC<IAuthContextProviderProps> = ({ children })
   const location=useLocation()
   
 const setLogOut = () => {
+    const isPlatformAdminUser = userData?.is_platform_admin === true;
     // Keep Redux auth mode in sync with context logout.
     dispatch(setAuthLogOut());
-    navigate("/login");
+    navigate(isPlatformAdminUser ? '/admin/login' : '/login');
     setUser('');
     setUserData({});
     Cookies.remove('socketIOToken');
     Cookies.remove('refreshToken'); 
     Cookies.remove('accessToken');
     Cookies.remove('token');
+    Cookies.remove('tenant');
 
 };
   
@@ -49,13 +58,22 @@ const setLogOut = () => {
       try {
         const token = Cookies.get('token');
         if (!token) {
-					setLogOut();
-					return;
-				}
+          setUser('');
+          setUserData({});
+          if (!isPublicAuthPath(location.pathname)) {
+            navigate('/login');
+          }
+          return;
+        }
           const url = '/api/users/profile/';
           const response = await authAxios.get(url);
-          setUser(response.data?.email);
-          setUserData(response.data?.user);
+          const profileUser = response.data?.user ?? response.data;
+          setUser(profileUser?.email ?? response.data?.email);
+          setUserData({
+            ...profileUser,
+            is_platform_admin:
+              response.data?.is_platform_admin ?? profileUser?.is_platform_admin ?? false,
+          });
           
         
       } catch (error: any) { // Using `any` for the error type since Axios errors can have any shape
@@ -64,9 +82,11 @@ const setLogOut = () => {
 
       }
     };
-    if(!location.pathname.includes('public')){
+    if (!isPublicAuthPath(location.pathname)) {
       fetchData();
-
+    } else if (!Cookies.get('token')) {
+      setUser('');
+      setUserData({});
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

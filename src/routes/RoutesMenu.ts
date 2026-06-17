@@ -33,6 +33,14 @@ export const allRoutesObject = {
 		id: 'RoleManagement',
 		path: '/roles',
 	},
+	Registrations: {
+		id: 'Registrations',
+		path: '/registrations',
+	},
+	Customers: {
+		id: 'Customers',
+		path: '/customers',
+	},
 	ScheduleComponentDemo: {
 		id: 'ScheduleComponentDemo',
 		path: '/schedule-component-demo',
@@ -234,6 +242,21 @@ export const UserRoutes = {
 
 export const SelfRoutes = UserRoutes;
 
+export const PlatformAdminRoutes = {
+	Registrations: {
+		id: 'Registrations',
+		text: 'Registrations',
+		path: '/registrations',
+		icon: 'AppRegistration',
+	},
+	Customers: {
+		id: 'Customers',
+		text: 'Customers',
+		path: '/customers',
+		icon: 'Business',
+	},
+};
+
 /** HR and Manager consoles use the same sidebar as company admin (page access is gated in contentRoutes). */
 export const HRRoutes = CompanyAdminRoutes;
 export const ManagerRoutes = CompanyAdminRoutes;
@@ -244,6 +267,7 @@ export const roleWiseRoutes: Record<string, any> = {
 	HR: HRRoutes,
 	user: UserRoutes,
 	User: UserRoutes,
+	platform_admin: PlatformAdminRoutes,
 };
 
 	
@@ -298,6 +322,12 @@ export const pagesNotInSideBar = {
 		path: 'login',
 		icon: 'Login',
 	},
+	adminLogin: {
+		id: 'adminLogin',
+		text: 'Admin Login',
+		path: '/admin/login',
+		icon: 'Login',
+	},
 	Contact: {
 		id: 'Contact',
 		text: 'Contact',
@@ -314,6 +344,12 @@ export const pagesNotInSideBar = {
 		id: 'ForgotPassword',
 		text: 'ForgotPassword',
 		path: '/forgotpassword',
+		icon: 'Login',
+	},
+	SetPassword: {
+		id: 'SetPassword',
+		text: 'Set Password',
+		path: '/set-password',
 		icon: 'Login',
 	},
 

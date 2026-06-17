@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
 import React, { useContext, useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import Cookies from 'js-cookie';
 import PropTypes from 'prop-types';
@@ -18,11 +18,17 @@ import loginBackground from '../../assets/Home.jpg';
 import { setLogOut } from '../../store/auth';
 import validateEmail from '../../helpers/emailValidator';
 import AbaciLoader from '../../components/AbaciLoader/AbaciLoader';
-import { getHomePathForUserType } from '../../helpers/roleToggleUtils';
+import { getHomePathForUser } from '../../helpers/roleToggleUtils';
 import PageWrapper from '../../layout/PageWrapper/PageWrapper';
 import Page from '../../layout/Page/Page';
+import Signup from './Signup';
 
-const Login = () => {
+const Login = ({
+	loginApiUrl = 'api/users/login/',
+	heading = 'USER LOGIN',
+	pageTitle = 'Login',
+	showSignup = true,
+}) => {
 	const navigate = useNavigate();
 	const dispatch = useDispatch();
 	const { setUser, setUserData,  } = useContext(AuthContext);
@@ -30,6 +36,7 @@ const Login = () => {
 	const [signInPassword] = useState(false);
 	const [waitingForAxios, setWaitingForAxios] = useState(false);
 	const [isLoading, setIsLoading] = useState(true);
+	const [isSignUp, setIsSignUp] = useState(false);
 	const { userData } = useContext(AuthContext);
 
 	useEffect(() => {
@@ -37,7 +44,7 @@ const Login = () => {
 			if (Object.keys(userData).length === 0) {
 				setTimeout(() => setIsLoading(false), 2000);
 			} else {
-				navigate(getHomePathForUserType(userData?.user_type));
+				navigate(getHomePathForUser(userData));
 			}
 		}
 		// eslint-disable-next-line react-hooks/exhaustive-deps
@@ -74,7 +81,7 @@ const Login = () => {
 	const handleSignin = (values) => {
 		setWaitingForAxios(true);
 
-		const url = 'api/users/login/';
+		const url = loginApiUrl;
 		const dataToBeSend = {
 			password: values.loginPassword,
 			email: values.loginUsername,
@@ -83,25 +90,35 @@ const Login = () => {
 			.post(url, dataToBeSend)
 			.then((response) => {
 				const responseData = response?.data || {};
+				const userPayload = responseData?.user ?? responseData;
+				const enrichedUser = {
+					...userPayload,
+					is_platform_admin:
+						responseData?.is_platform_admin ?? userPayload?.is_platform_admin ?? false,
+				};
+				const isPlatformAdminUser = enrichedUser.is_platform_admin === true;
+
 				const tenant = responseData?.tenant ?? responseData?.tenants?.[0];
 				const tenantName =
 					(typeof tenant === 'object' && (tenant?.schema_name || tenant?.tenant_name || tenant?.domain)) ||
 					tenant;
-				if (tenantName !== undefined && tenantName !== null) {
+
+				if (isPlatformAdminUser) {
+					Cookies.remove('tenant');
+				} else if (tenantName !== undefined && tenantName !== null) {
 					Cookies.set('tenant', String(tenantName));
 				}
 
 				const token = responseData?.access ?? responseData?.token ?? Cookies.get('token');
 				if (token) {
 					Cookies.set('token', token);
-					updateToken(token, tenantName);
+					updateToken(token, isPlatformAdminUser ? null : tenantName);
 				}
 
-				const userPayload = responseData?.user ?? responseData;
-				setUser(userPayload?.email ?? values.loginUsername);
-				setUserData({ ...userPayload });
+				setUser(enrichedUser?.email ?? values.loginUsername);
+				setUserData({ ...enrichedUser });
 				setWaitingForAxios(false);
-				navigate(getHomePathForUserType(userPayload?.user_type));
+				navigate(getHomePathForUser(enrichedUser));
 
 				// setIsLoading(false);
 				// updateToken(response.data?.tenants[0]);
@@ -126,7 +143,7 @@ const Login = () => {
 	return (
 		<PageWrapper
 			isProtected={false}
-			title='Login'
+			title={isSignUp ? 'Sign Up' : pageTitle}
 			className='p-0 bg-white'>
 			<Page className='p-0' container={false}>
 				<div style={{ width: '100%', height: '100vh' }}>
@@ -140,7 +157,9 @@ const Login = () => {
 								</div>
 							</Col>
 							<Col lg={4}>
-								<div className='authentication-page-content p-4 d-flex  justify-content-center align-items-center min-vh-100'>
+								<div
+									className='authentication-page-content p-4 d-flex justify-content-center align-items-center min-vh-100'
+									style={{ overflowY: 'auto' }}>
 									<div className='' style={{ width: '80%' }}>
 										<div className='p-5'>
 											<div className='text-center'>
@@ -165,77 +184,102 @@ const Login = () => {
 													'bg-dark': darkModeStatus,
 												})}
 											/>
-											<div className='text-center h2  mt-4 mb-5'>USER LOGIN</div>
-											<form
-												className='row g-4'
-												onKeyDown={(e) => {
-													if (e.key === 'Enter') {
-														e.preventDefault();
-														formik.handleSubmit();
-													}
-												}}>
-												<div className='col-12'>
-													<FormGroup
-														id='loginUsername'
-														isFloating
-														label='Username'
-														className={classNames({
-															'd-none': signInPassword,
-														})}>
-														<Input
-															autoComplete='username'
-															value={formik.values.loginUsername}
-															isTouched={formik.touched.loginUsername}
-															invalidFeedback={formik.errors.loginUsername}
-															isValid={formik.isValid}
-															onChange={formik.handleChange}
-															onBlur={formik.handleBlur}
-															onFocus={() => {
-																formik.setErrors({});
-															}}
-														/>
-													</FormGroup>
-													<br />
-													<FormGroup
-														id='loginPassword'
-														isFloating
-														label='Password'>
-														<Input
-															type='password'
-															autoComplete='current-password'
-															value={formik.values.loginPassword}
-															isTouched={formik.touched.loginPassword}
-															invalidFeedback={formik.errors.loginPassword}
-															// validFeedback="Looks good!"
-															isValid={formik.isValid}
-															onChange={formik.handleChange}
-															onBlur={formik.handleBlur}
-														/>
-													</FormGroup>
-												</div>
-												{/* eslint-disable jsx-a11y/no-noninteractive-element-interactions */}
-												<div className='d-flex justify-content-end'>
-													{/* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */}
-													<p
-														className='cursor-pointer user-select-none'
-														onClick={() => navigate('/forgotpassword')}>
-														Forgot password ?
-													</p>
-												</div>
-												{/* eslint-enable jsx-a11y/no-noninteractive-element-interactions */}
+											<div className='text-center h2 mt-4 mb-5'>
+												{isSignUp ? 'SIGN UP' : heading}
+											</div>
+											{isSignUp ? (
+												<Signup onSwitchToLogin={() => setIsSignUp(false)} />
+											) : (
+												<>
+													<form
+														className='row g-4'
+														onKeyDown={(e) => {
+															if (e.key === 'Enter') {
+																e.preventDefault();
+																formik.handleSubmit();
+															}
+														}}>
+														<div className='col-12'>
+															<FormGroup
+																id='loginUsername'
+																isFloating
+																label='Username'
+																className={classNames({
+																	'd-none': signInPassword,
+																})}>
+																<Input
+																	autoComplete='username'
+																	value={formik.values.loginUsername}
+																	isTouched={formik.touched.loginUsername}
+																	invalidFeedback={formik.errors.loginUsername}
+																	isValid={formik.isValid}
+																	onChange={formik.handleChange}
+																	onBlur={formik.handleBlur}
+																	onFocus={() => {
+																		formik.setErrors({});
+																	}}
+																/>
+															</FormGroup>
+															<br />
+															<FormGroup
+																id='loginPassword'
+																isFloating
+																label='Password'>
+																<Input
+																	type='password'
+																	autoComplete='current-password'
+																	value={formik.values.loginPassword}
+																	isTouched={formik.touched.loginPassword}
+																	invalidFeedback={formik.errors.loginPassword}
+																	isValid={formik.isValid}
+																	onChange={formik.handleChange}
+																	onBlur={formik.handleBlur}
+																/>
+															</FormGroup>
+														</div>
+														<div className='d-flex justify-content-end'>
+															<p
+																className='cursor-pointer user-select-none mb-0'
+																onClick={() => navigate('/forgotpassword')}
+																onKeyDown={(e) => {
+																	if (e.key === 'Enter' || e.key === ' ') {
+																		navigate('/forgotpassword');
+																	}
+																}}
+																role='button'
+																tabIndex={0}>
+																Forgot password ?
+															</p>
+														</div>
 
-												<div className='col-12 mt-3 text-center'>
-													<Button
-														color='warning'
-														icon='Login'
-														className=' py-2'
-														style={{ width: '150px' }}
-														isDisable={waitingForAxios}
-														onClick={formik.handleSubmit}>
-														{waitingForAxios ? <Spinner size='sm' /> : 'Login'}
-													</Button>
-												</div>
-											</form>
+														<div className='col-12 mt-3 text-center'>
+															<Button
+																color='warning'
+																icon='Login'
+																className='py-2'
+																style={{ width: '150px' }}
+																isDisable={waitingForAxios}
+																onClick={formik.handleSubmit}>
+																{waitingForAxios ? <Spinner size='sm' /> : 'Login'}
+															</Button>
+														</div>
+													</form>
+
+													{showSignup && (
+														<div className='text-center mt-4'>
+															<p className='mb-0'>
+																Don&apos;t have an account?{' '}
+																<button
+																	type='button'
+																	className='btn btn-link p-0 align-baseline'
+																	onClick={() => setIsSignUp(true)}>
+																	Sign up
+																</button>
+															</p>
+														</div>
+													)}
+												</>
+											)}
 
 											{/* <div className='text-center'>
 											<a
@@ -269,11 +313,12 @@ const Login = () => {
 		</PageWrapper>
 	);
 };
+
 Login.propTypes = {
-	isSignUp: PropTypes.bool,
-};
-Login.defaultProps = {
-	isSignUp: false,
+	loginApiUrl: PropTypes.string,
+	heading: PropTypes.string,
+	pageTitle: PropTypes.string,
+	showSignup: PropTypes.bool,
 };
 
 export default Login;

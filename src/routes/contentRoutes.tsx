@@ -25,6 +25,8 @@ const MAINROUTE={
 	EventLog: lazy(() => import('../pages/EventLog/index')),
 	RoleManagement: lazy(() => import('../pages/RoleManagement/index')),
 	Settings: lazy(() => import('../pages/Settings/index')),
+	Registrations: lazy(() => import('../pages/PlatformAdmin/Registrations/index')),
+	Customers: lazy(() => import('../pages/PlatformAdmin/Customers/index')),
 }
 interface CustomRouteConfig {
 	path: string;
@@ -37,6 +39,7 @@ const ADMIN_CONSOLE_ROLES = ['Admin', 'Manager', 'HR'];
 /** User role and Self toggle mode share the same self-service pages. */
 const SELF_MODE_USER_ROLE = 'user';
 const SELF_MODE_ROUTES = [...ADMIN_CONSOLE_ROLES, SELF_MODE_USER_ROLE];
+const PLATFORM_ADMIN_ROLES = ['platform_admin'];
 
 const RouteConfig: CustomRouteConfig[] = [
 	{
@@ -138,6 +141,16 @@ const RouteConfig: CustomRouteConfig[] = [
 		path: allRoutesObject.Settings.path,
 		element: <MAINROUTE.Settings />,
 		allowedTo: ADMIN_CONSOLE_ROLES,
+	},
+	{
+		path: allRoutesObject.Registrations.path,
+		element: <MAINROUTE.Registrations />,
+		allowedTo: PLATFORM_ADMIN_ROLES,
+	},
+	{
+		path: allRoutesObject.Customers.path,
+		element: <MAINROUTE.Customers />,
+		allowedTo: PLATFORM_ADMIN_ROLES,
 	},
 ]
 
