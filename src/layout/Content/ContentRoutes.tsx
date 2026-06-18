@@ -14,6 +14,7 @@ import Unauthorized from '../../pages/PublicPages/Unauthorized';
 import AbaciLoader from '../../components/AbaciLoader/AbaciLoader';
 import RouteConfig from '../../routes/contentRoutes';
 import { getEffectiveUserTypeForRoutes, isPlatformAdmin, PLATFORM_ADMIN_HOME_PATH } from '../../helpers/roleToggleUtils';
+import { getDefaultAuthPath } from '../../helpers/baseURL';
 
 
 const ContentRoutes = () => {
@@ -28,6 +29,7 @@ const ContentRoutes = () => {
       const path = window.location.pathname;
       const isPublicAuthPath =
         path.startsWith('/public') ||
+        path === '/' ||
         path === '/login' ||
         path === '/clockin-admin/login' ||
         path === '/signup' ||
@@ -46,6 +48,7 @@ const ContentRoutes = () => {
   return (
     <Routes>
       {/* Public Routes */}
+      <Route path="/" element={<Navigate to={getDefaultAuthPath()} replace />} />
       <Route path="/login" element={<Login />} />
       <Route path="/clockin-admin/login" element={<AdminLogin />} />
       <Route path="/signup" element={<Signup />} />

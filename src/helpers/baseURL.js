@@ -16,11 +16,13 @@ export const getRootDomain = () => {
 
 const getOriginWithoutDevPort = () => window.location.origin.split(':3000')[0];
 
-const isOnTenantSubdomain = () => {
+export const isOnTenantSubdomain = () => {
 	const rootDomain = getRootDomain();
 	const { hostname } = window.location;
 	return hostname !== rootDomain && hostname.endsWith(`.${rootDomain}`);
 };
+
+export const getDefaultAuthPath = () => (isOnTenantSubdomain() ? '/login' : '/signup');
 
 const isOnApiHost = () => {
 	const rootDomain = getRootDomain();
