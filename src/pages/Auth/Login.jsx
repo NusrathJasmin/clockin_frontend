@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
 import React, { useContext, useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import Cookies from 'js-cookie';
 import PropTypes from 'prop-types';
@@ -18,30 +18,29 @@ import loginBackground from '../../assets/Home.jpg';
 import { setLogOut } from '../../store/auth';
 import validateEmail from '../../helpers/emailValidator';
 import AbaciLoader from '../../components/AbaciLoader/AbaciLoader';
-import { getHomePathForUserType } from '../../helpers/roleToggleUtils';
+import { getHomePathForUser } from '../../helpers/roleToggleUtils';
 import PageWrapper from '../../layout/PageWrapper/PageWrapper';
 import Page from '../../layout/Page/Page';
+import Error from '../../helpers/Error';
 
-const Login = () => {
+const Login = ({
+	loginApiUrl = 'api/users/login/',
+	heading = 'USER LOGIN',
+	pageTitle = 'Login',
+	showSignup = true,
+}) => {
 	const navigate = useNavigate();
 	const dispatch = useDispatch();
-	const { setUser, setUserData,  } = useContext(AuthContext);
+	const { userData, setUser, setUserData } = useContext(AuthContext);
 	const { darkModeStatus } = useDarkMode();
 	const [signInPassword] = useState(false);
 	const [waitingForAxios, setWaitingForAxios] = useState(false);
-	const [isLoading, setIsLoading] = useState(true);
-	const { userData } = useContext(AuthContext);
 
 	useEffect(() => {
-		if (userData !== null) {
-			if (Object.keys(userData).length === 0) {
-				setTimeout(() => setIsLoading(false), 2000);
-			} else {
-				navigate(getHomePathForUserType(userData?.user_type));
-			}
+		if (userData !== null && Object.keys(userData).length > 0) {
+			navigate(getHomePathForUser(userData));
 		}
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [userData]);
+	}, [userData, navigate]);
 
 	const formik = useFormik({
 		enableReinitialize: true,
@@ -52,7 +51,6 @@ const Login = () => {
 		validate: (values) => {
 			const errors = {};
 			const emailError = validateEmail(values.loginUsername);
-			// console.log('emailError', emailError);
 			if (!values.loginUsername) {
 				errors.loginUsername = 'Required';
 			}
@@ -65,7 +63,6 @@ const Login = () => {
 			}
 			return errors;
 		},
-		// validateOnChange: false,
 		onSubmit: (values) => {
 			handleSignin(values);
 		},
@@ -74,7 +71,7 @@ const Login = () => {
 	const handleSignin = (values) => {
 		setWaitingForAxios(true);
 
-		const url = 'api/users/login/';
+		const url = loginApiUrl;
 		const dataToBeSend = {
 			password: values.loginPassword,
 			email: values.loginUsername,
@@ -83,28 +80,35 @@ const Login = () => {
 			.post(url, dataToBeSend)
 			.then((response) => {
 				const responseData = response?.data || {};
+				const userPayload = responseData?.user ?? responseData;
+				const enrichedUser = {
+					...userPayload,
+					is_platform_admin:
+						responseData?.is_platform_admin ?? userPayload?.is_platform_admin ?? false,
+				};
+				const isPlatformAdminUser = enrichedUser.is_platform_admin === true;
+
 				const tenant = responseData?.tenant ?? responseData?.tenants?.[0];
 				const tenantName =
 					(typeof tenant === 'object' && (tenant?.schema_name || tenant?.tenant_name || tenant?.domain)) ||
 					tenant;
-				if (tenantName !== undefined && tenantName !== null) {
+
+				if (isPlatformAdminUser) {
+					Cookies.remove('tenant');
+				} else if (tenantName !== undefined && tenantName !== null) {
 					Cookies.set('tenant', String(tenantName));
 				}
 
 				const token = responseData?.access ?? responseData?.token ?? Cookies.get('token');
 				if (token) {
 					Cookies.set('token', token);
-					updateToken(token, tenantName);
+					updateToken(token, isPlatformAdminUser ? null : tenantName);
 				}
 
-				const userPayload = responseData?.user ?? responseData;
-				setUser(userPayload?.email ?? values.loginUsername);
-				setUserData({ ...userPayload });
+				setUser(enrichedUser?.email ?? values.loginUsername);
+				setUserData({ ...enrichedUser });
 				setWaitingForAxios(false);
-				navigate(getHomePathForUserType(userPayload?.user_type));
-
-				// setIsLoading(false);
-				// updateToken(response.data?.tenants[0]);
+				navigate(getHomePathForUser(enrichedUser));
 			})
 			.catch((error) => {
 				setWaitingForAxios(false);
@@ -112,7 +116,10 @@ const Login = () => {
 				let errorMessage = null;
 				if (error.response?.status === 403) {
 					errorMessage = error?.response?.data?.detail;
-				} else {
+				}else if (error.response?.status === 400) {
+					errorMessage = Error(error, () => {});
+				}
+				else {
 					errorMessage = 'Error occured, please check your connection and try again!';
 				}
 				formik.setFieldError('loginPassword', errorMessage);
@@ -120,14 +127,11 @@ const Login = () => {
 			});
 	};
 
-	if (isLoading) {
+	if (userData === null) {
 		return <AbaciLoader />;
 	}
 	return (
-		<PageWrapper
-			isProtected={false}
-			title='Login'
-			className='p-0 bg-white'>
+		<PageWrapper isProtected={false} title={pageTitle} className='p-0 bg-white'>
 			<Page className='p-0' container={false}>
 				<div style={{ width: '100%', height: '100vh' }}>
 					<Container fluid className='p-0'>
@@ -140,32 +144,17 @@ const Login = () => {
 								</div>
 							</Col>
 							<Col lg={4}>
-								<div className='authentication-page-content p-4 d-flex  justify-content-center align-items-center min-vh-100'>
-									<div className='' style={{ width: '80%' }}>
-										<div className='p-5'>
-											<div className='text-center'>
-												{/* <Link
-											to='/'
-											className={classNames(
-												'text-decoration-none  fw-bold display-2',
-												{
-													'text-dark': !darkModeStatus,
-													'text-light': darkModeStatus,
-												},
-											)}
-											aria-label='Facit'>
-											
-											<img src={LogoForLogin} alt='' height='70' />
-										</Link> */}
-												<img src={LogoForLogin} alt='' height='70' />
+								<div
+									className='authentication-page-content p-4 d-flex justify-content-center align-items-center min-vh-100'
+									style={{ overflowY: 'auto' }}>
+									<div style={{ width: '80%' }}>
+										<div className='py-5'>
+											<div className='text-center mb-4'>
+												<img src={LogoForLogin} alt='Logo' height='70' />
 											</div>
-											<div
-												className={classNames('rounded-3', {
-													'bg-l10-dark': !darkModeStatus,
-													'bg-dark': darkModeStatus,
-												})}
-											/>
-											<div className='text-center h2  mt-4 mb-5'>USER LOGIN</div>
+
+											<div className='text-center h2 mb-4'>{heading}</div>
+
 											<form
 												className='row g-4'
 												onKeyDown={(e) => {
@@ -196,39 +185,39 @@ const Login = () => {
 														/>
 													</FormGroup>
 													<br />
-													<FormGroup
-														id='loginPassword'
-														isFloating
-														label='Password'>
+													<FormGroup id='loginPassword' isFloating label='Password'>
 														<Input
 															type='password'
 															autoComplete='current-password'
 															value={formik.values.loginPassword}
 															isTouched={formik.touched.loginPassword}
 															invalidFeedback={formik.errors.loginPassword}
-															// validFeedback="Looks good!"
 															isValid={formik.isValid}
 															onChange={formik.handleChange}
 															onBlur={formik.handleBlur}
 														/>
 													</FormGroup>
 												</div>
-												{/* eslint-disable jsx-a11y/no-noninteractive-element-interactions */}
 												<div className='d-flex justify-content-end'>
-													{/* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */}
 													<p
-														className='cursor-pointer user-select-none'
-														onClick={() => navigate('/forgotpassword')}>
+														className='cursor-pointer user-select-none mb-0'
+														onClick={() => navigate('/forgotpassword')}
+														onKeyDown={(e) => {
+															if (e.key === 'Enter' || e.key === ' ') {
+																navigate('/forgotpassword');
+															}
+														}}
+														role='button'
+														tabIndex={0}>
 														Forgot password ?
 													</p>
 												</div>
-												{/* eslint-enable jsx-a11y/no-noninteractive-element-interactions */}
 
 												<div className='col-12 mt-3 text-center'>
 													<Button
 														color='warning'
 														icon='Login'
-														className=' py-2'
+														className='py-2'
 														style={{ width: '150px' }}
 														isDisable={waitingForAxios}
 														onClick={formik.handleSubmit}>
@@ -237,27 +226,19 @@ const Login = () => {
 												</div>
 											</form>
 
-											{/* <div className='text-center'>
-											<a
-												href='/'
-												className={classNames('text-decoration-none me-3', {
-													'link-light': singUpStatus,
-													'link-dark': !singUpStatus,
-												})}>
-												Privacy policy
-											</a>
-											<a
-												href='/'
-												className={classNames(
-													'link-light text-decoration-none',
-													{
-														'link-light': singUpStatus,
-														'link-dark': !singUpStatus,
-													},
-												)}>
-												Terms of use
-											</a>
-										</div> */}
+											{showSignup && (
+												<div className='text-center mt-4'>
+													<p className='mb-0'>
+														Don&apos;t have an account?{' '}
+														<button
+															type='button'
+															className='btn btn-link p-0 align-baseline'
+															onClick={() => navigate('/signup')}>
+															Sign up
+														</button>
+													</p>
+												</div>
+											)}
 										</div>
 									</div>
 								</div>
@@ -269,12 +250,12 @@ const Login = () => {
 		</PageWrapper>
 	);
 };
+
 Login.propTypes = {
-	isSignUp: PropTypes.bool,
-};
-Login.defaultProps = {
-	isSignUp: false,
+	loginApiUrl: PropTypes.string,
+	heading: PropTypes.string,
+	pageTitle: PropTypes.string,
+	showSignup: PropTypes.bool,
 };
 
 export default Login;
-/* eslint-enable @typescript-eslint/no-use-before-define */
