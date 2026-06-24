@@ -1,5 +1,4 @@
 import React, { useCallback, useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import MaterialTable from '@material-table/core';
 import { ThemeProvider } from '@mui/material/styles';
 import { Tooltip } from '@mui/material';
@@ -16,48 +15,45 @@ import useToasterNotification from '../../../hooks/useToasterNotification';
 import Moments from '../../../helpers/Moment';
 import { buttonColor } from '../../../helpers/constants';
 
-const CustomersTable = ({ tableRef, urlBackup }: any) => {
-	const navigate = useNavigate();
+const LicensesTable = ({ tableRef, urlBackup }: any) => {
 	const [filterEnabled, setFilterEnabled] = useState(false);
 	const [pageSize, setPageSize] = useState(10);
 	const [sortState, setSortState] = useState({ orderBy: null, orderDirection: 'asc' });
-	const [statusUpdatingId, setStatusUpdatingId] = useState<number | null>(null);
+	const [cancelUpdatingId, setCancelUpdatingId] = useState<number | null>(null);
 	const { theme, rowStyles, headerStyles } = useTablestyle();
 	const { showErrorNotification, showSuccessNotification } = useToasterNotification();
 
-	const handleClientStatus = useCallback(
-		(row: any, status: 'ACTIVE' | 'BLOCKED') => {
-			const isBlock = status === 'BLOCKED';
-			const displayName = row?.name || row?.schema_name || row?.primary_domain || 'this customer';
+	const handleCancelLicense = useCallback(
+		(row: any) => {
+			const displayName =
+				row?.plan_name && row?.client_name
+					? `${row.plan_name} (${row.client_name})`
+					: row?.plan_name || row?.client_name || 'this license';
 
 			Swal.fire({
-				title: isBlock ? 'Block customer?' : 'Activate customer?',
-				text: isBlock
-					? `Block ${displayName}? They will not be able to access the platform.`
-					: `Activate ${displayName}? They will regain access to the platform.`,
-				icon: isBlock ? 'warning' : 'question',
+				title: 'Cancel license?',
+				text: `Cancel ${displayName}?`,
+				icon: 'warning',
 				showCancelButton: true,
-				confirmButtonColor: buttonColor[isBlock ? 0 : 1],
-				cancelButtonColor: buttonColor[isBlock ? 1 : 0],
-				confirmButtonText: isBlock ? 'Block' : 'Activate',
+				confirmButtonColor: buttonColor[0],
+				cancelButtonColor: buttonColor[1],
+				confirmButtonText: 'Cancel License',
 			}).then((result) => {
 				if (!result.isConfirmed || !row?.id) return;
 
-				setStatusUpdatingId(row.id);
+				setCancelUpdatingId(row.id);
 				authAxios
-					.patch(`api/customers/clients/${row.id}/`, { status })
+					.patch(`api/customers/licenses/${row.id}/`, { status: 'CANCELLED' })
 					.then((response) => {
 						tableRef?.current?.onQueryChange?.();
 						const message =
 							response?.data?.message ||
 							response?.data?.detail ||
-							(isBlock
-								? 'Customer blocked successfully.'
-								: 'Customer activated successfully.');
+							'License cancelled successfully.';
 						showSuccessNotification(message);
 					})
 					.catch((error) => showErrorNotification(error))
-					.finally(() => setStatusUpdatingId(null));
+					.finally(() => setCancelUpdatingId(null));
 			});
 		},
 		[tableRef, showErrorNotification, showSuccessNotification],
@@ -66,19 +62,62 @@ const CustomersTable = ({ tableRef, urlBackup }: any) => {
 	const columns = useMemo(
 		() => [
 			{
-				title: 'Company',
-				field: 'name',
-				render: (rowData: any) => rowData?.name || '----',
+				title: 'Client',
+				field: 'client_name',
+				render: (rowData: any) =>
+					rowData?.client_name ||
+					rowData?.client?.name ||
+					rowData?.client?.schema_name ||
+					rowData?.client ||
+					'----',
 			},
 			{
-				title: 'Schema',
-				field: 'schema_name',
-				render: (rowData: any) => rowData?.schema_name || '----',
+				title: 'Plan',
+				field: 'plan_name',
+				render: (rowData: any) => rowData?.plan_name || '----',
 			},
 			{
-				title: 'Primary Domain',
-				field: 'primary_domain',
-				render: (rowData: any) => rowData?.primary_domain || '----',
+				title: 'Max Users',
+				field: 'max_users',
+				render: (rowData: any) => rowData?.max_users ?? '----',
+			},
+			{
+				title: 'Start Date',
+				field: 'start_date',
+				filtering: true,
+				type: 'date',
+				render: (rowData: any) =>
+				  rowData?.start_date ? Moments(rowData.start_date, 'date') : '----',
+				filterComponent: (props: any) => (
+				  <input
+					type='date'
+					value={props.columnDef.tableData.filterValue || ''}
+					onChange={(e) => props.onFilterChanged(props.columnDef.tableData.id, e.target.value)}
+					style={{
+					  width: '100%',
+					  padding: '4px',
+					}}
+				  />
+				),
+			  },
+			{
+				title: 'Expiry Date',
+				field: 'expiry_date',
+				filtering: true,
+				type: 'date',
+				render: (rowData: any) =>
+					rowData?.expiry_date ? Moments(rowData.expiry_date, 'date') : '----',
+				filterComponent: (props: any) => (
+					<input
+						type='date'
+						value={props.columnDef.tableData.filterValue || ''}
+						onChange={(e) => props.onFilterChanged(props.columnDef.tableData.id, e.target.value)}
+						style={{
+							width: '100%',
+							padding: '4px',
+						}}
+					/>
+				),
 			},
 			{
 				title: 'Status',
@@ -88,30 +127,17 @@ const CustomersTable = ({ tableRef, urlBackup }: any) => {
 				),
 			},
 			{
-				title: 'On Trial',
-				field: 'on_trial',
+				title: 'Trial',
+				field: 'is_trial',
 				lookup: {
 					true: 'Yes',
 					false: 'No',
 				},
 				render: (rowData: any) => (
-					<Badge color={rowData?.on_trial ? 'info' : 'secondary'} isLight>
-						{rowData?.on_trial ? 'Yes' : 'No'}
+					<Badge color={rowData?.is_trial ? 'info' : 'secondary'} isLight>
+						{rowData?.is_trial ? 'Yes' : 'No'}
 					</Badge>
 				),
-			},
-			{
-				title: 'Paid Until',
-				field: 'paid_until',
-				render: (rowData: any) =>
-					rowData?.paid_until ? Moments(rowData.paid_until, 'date') : '----',
-			},
-			{
-				title: 'Created',
-				field: 'created_on',
-				filtering: false,
-				render: (rowData: any) =>
-					rowData?.created_on ? Moments(rowData.created_on, 'date') : '----',
 			},
 			{
 				title: 'Actions',
@@ -122,10 +148,10 @@ const CustomersTable = ({ tableRef, urlBackup }: any) => {
 				filtering: false,
 				render: (rowData: any) => {
 					const rowStatus = String(rowData?.status || '').toUpperCase();
-					if (rowStatus === 'ACTIVE' || rowStatus === 'INACTIVE') {
+					if (rowStatus === 'PENDING' || rowStatus === 'ACTIVE') {
 						return (
 							<div className='d-flex align-items-center justify-content-end gap-2'>
-								<Tooltip arrow title='Block customer' placement='top'>
+								<Tooltip arrow title='Cancel license' placement='top'>
 									<span className='d-inline-flex'>
 										<Button
 											type='button'
@@ -133,34 +159,11 @@ const CustomersTable = ({ tableRef, urlBackup }: any) => {
 											isLight
 											size='sm'
 											icon='Block'
-											isDisable={statusUpdatingId === rowData?.id}
+											isDisable={cancelUpdatingId === rowData?.id}
 											onClick={(e: React.MouseEvent) => {
 												e.preventDefault();
 												e.stopPropagation();
-												handleClientStatus(rowData, 'BLOCKED');
-											}}
-										/>
-									</span>
-								</Tooltip>
-							</div>
-						);
-					}
-					if (rowStatus === 'BLOCKED') {
-						return (
-							<div className='d-flex align-items-center justify-content-end gap-2'>
-								<Tooltip arrow title='Activate customer' placement='top'>
-									<span className='d-inline-flex'>
-										<Button
-											type='button'
-											color='success'
-											isLight
-											size='sm'
-											icon='CheckCircle'
-											isDisable={statusUpdatingId === rowData?.id}
-											onClick={(e: React.MouseEvent) => {
-												e.preventDefault();
-												e.stopPropagation();
-												handleClientStatus(rowData, 'ACTIVE');
+												handleCancelLicense(rowData);
 											}}
 										/>
 									</span>
@@ -172,7 +175,7 @@ const CustomersTable = ({ tableRef, urlBackup }: any) => {
 				},
 			},
 		],
-		[handleClientStatus, statusUpdatingId],
+		[handleCancelLicense, cancelUpdatingId],
 	);
 
 	return (
@@ -183,10 +186,6 @@ const CustomersTable = ({ tableRef, urlBackup }: any) => {
 					title=' '
 					columns={columns as any}
 					tableRef={tableRef}
-					//@ts-ignore
-					onRowClick={(_e: React.MouseEvent, rowData: any) => {
-						if (rowData?.id != null) navigate(`/customer-details/${rowData.id}`);
-					}}
 					//@ts-ignore
 					onOrderChange={(orderBy, orderDirection) => {
 						setSortState({ orderBy, orderDirection });
@@ -201,7 +200,7 @@ const CustomersTable = ({ tableRef, urlBackup }: any) => {
 										? `&ordering=-${String(query.orderBy?.field)}`
 										: `&ordering=${String(query.orderBy?.field)}`;
 							}
-							const url = `api/customers/clients/?limit=${query.pageSize}&offset=${
+							const url = `api/customers/licenses/?limit=${query.pageSize}&offset=${
 								query.pageSize * query.page
 							}&search=${encodeURIComponent(query.search || '')}${orderBy}&${otherFilters}`;
 
@@ -245,10 +244,10 @@ const CustomersTable = ({ tableRef, urlBackup }: any) => {
 };
 
 /* eslint-disable react/forbid-prop-types */
-CustomersTable.propTypes = {
+LicensesTable.propTypes = {
 	tableRef: PropTypes.object.isRequired,
 	urlBackup: PropTypes.object.isRequired,
 };
 /* eslint-enable react/forbid-prop-types */
 
-export default CustomersTable;
+export default LicensesTable;

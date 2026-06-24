@@ -164,12 +164,25 @@ export const getTimeZone = () => {
 
 export const formatFilters = (filters:any) => {
   const tempArray=['employee_details__is_in_bus','is_running','access']
+  /** Exact YYYY-MM-DD match — no datefilterrange_ or __icontains (e.g. license dates). */
+  const exactDateFields = ['start_date', 'expiry_date'];
   let otherFilters = ""; // Initialize the string that will hold the query parameters
   filters.filter((item:any) => {
       // Check if the value is an array and if it is not empty
       return !(Array.isArray(item.value) && item.value.length === 0);
   }).forEach((filtered_item:any) => { // Changed .map to .forEach since we're not transforming the array items
       let fieldName:string;
+
+      if (exactDateFields.includes(filtered_item.column.field)) {
+          const dateValue = moment(filtered_item.value).isValid()
+              ? moment(filtered_item.value).format('YYYY-MM-DD')
+              : String(filtered_item.value || '').trim();
+          if (dateValue) {
+              otherFilters += `&${filtered_item.column.field}=${dateValue}`;
+          }
+          return;
+      }
+
       if (filtered_item.column.type === "date") {
           // For date fields, prepend with 'datefilterrange_' and format the date value
           fieldName = `datefilterrange_${filtered_item.column.field}`;

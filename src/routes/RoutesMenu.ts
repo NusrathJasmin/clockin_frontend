@@ -41,6 +41,10 @@ export const allRoutesObject = {
 		id: 'Customers',
 		path: '/customers',
 	},
+	Licenses: {
+		id: 'Licenses',
+		path: '/licenses',
+	},
 	ScheduleComponentDemo: {
 		id: 'ScheduleComponentDemo',
 		path: '/schedule-component-demo',
@@ -255,6 +259,12 @@ export const PlatformAdminRoutes = {
 		path: '/customers',
 		icon: 'Business',
 	},
+	Licenses: {
+		id: 'Licenses',
+		text: 'Licenses',
+		path: '/licenses',
+		icon: 'CardMembership',
+	},
 };
 
 /** HR and Manager consoles use the same sidebar as company admin (page access is gated in contentRoutes). */
@@ -307,6 +317,12 @@ export const pagesNotInSideBar = {
 		id: 'GroupTemplateDetail',
 		text: 'Group details',
 		path: '/group-details/:id',
+		icon: '',
+	},
+	CustomerDetails: {
+		id: 'CustomerDetails',
+		text: 'Customer Details',
+		path: '/customer-details/:id',
 		icon: '',
 	},
 
