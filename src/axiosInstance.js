@@ -3,7 +3,7 @@ import { baseURL, getTenantApiBaseURL, getTenantRequestHeaders } from './helpers
 import { AxiosTimeout } from './helpers/constants';
 import Cookies from 'js-cookie';
 
-const TENANT_HEADER_EXCLUDED_PATHS = ['/users/admin/login'];
+const TENANT_HEADER_EXCLUDED_PATHS = ['/users/admin/login','/customers/registrations','/customers/clients','/customers/timezones','/customers/licenses/'];
  
 const shouldSkipTenantHeader = (config) => {
     const requestUrl = `${config?.baseURL || ''}${config?.url || ''}`;

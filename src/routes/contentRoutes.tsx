@@ -27,6 +27,8 @@ const MAINROUTE={
 	Settings: lazy(() => import('../pages/Settings/index')),
 	Registrations: lazy(() => import('../pages/PlatformAdmin/Registrations/index')),
 	Customers: lazy(() => import('../pages/PlatformAdmin/Customers/index')),
+	CustomerDetail: lazy(() => import('../pages/PlatformAdmin/Customers/CustomerDetails/CustomerDetailPage')),
+	Licenses: lazy(() => import('../pages/PlatformAdmin/Licenses/index')),
 }
 interface CustomRouteConfig {
 	path: string;
@@ -150,6 +152,16 @@ const RouteConfig: CustomRouteConfig[] = [
 	{
 		path: allRoutesObject.Customers.path,
 		element: <MAINROUTE.Customers />,
+		allowedTo: PLATFORM_ADMIN_ROLES,
+	},
+	{
+		path: pagesNotInSideBar.CustomerDetails.path,
+		element: <MAINROUTE.CustomerDetail />,
+		allowedTo: PLATFORM_ADMIN_ROLES,
+	},
+	{
+		path: allRoutesObject.Licenses.path,
+		element: <MAINROUTE.Licenses />,
 		allowedTo: PLATFORM_ADMIN_ROLES,
 	},
 ]

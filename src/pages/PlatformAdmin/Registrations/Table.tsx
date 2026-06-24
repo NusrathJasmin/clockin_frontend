@@ -4,26 +4,14 @@ import { ThemeProvider } from '@mui/material/styles';
 import PropTypes from 'prop-types';
 import FilterListIcon from '@mui/icons-material/FilterList';
 import Swal from 'sweetalert2';
-import Badge from '../../../components/bootstrap/Badge';
 import Button from '../../../components/bootstrap/Button';
+import StatusBadge from '../../../components/CustomComponent/StatusBadge';
 import { authAxios } from '../../../axiosInstance';
 import useTablestyle from '../../../hooks/useTablestyles';
 import { formatFilters } from '../../../helpers/functions';
 import useToasterNotification from '../../../hooks/useToasterNotification';
 import Moments from '../../../helpers/Moment';
 import { buttonColor } from '../../../helpers/constants';
-
-const statusColor = (status: string) => {
-	switch (status) {
-		case 'APPROVED':
-			return 'success';
-		case 'REJECTED':
-			return 'danger';
-		case 'PENDING':
-		default:
-			return 'warning';
-	}
-};
 
 const RegistrationsTable = ({ tableRef, urlBackup }: any) => {
 	const [filterEnabled, setFilterEnabled] = useState(false);
@@ -117,9 +105,7 @@ const RegistrationsTable = ({ tableRef, urlBackup }: any) => {
 				title: 'Status',
 				field: 'status',
 				render: (rowData: any) => (
-					<Badge color={statusColor(rowData?.status)} isLight>
-						{rowData?.status || '----'}
-					</Badge>
+					<StatusBadge status={rowData?.status} emptyFallback='----' />
 				),
 			},
 			{
