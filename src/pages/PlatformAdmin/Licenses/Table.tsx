@@ -4,7 +4,6 @@ import { ThemeProvider } from '@mui/material/styles';
 import { Tooltip } from '@mui/material';
 import PropTypes from 'prop-types';
 import FilterListIcon from '@mui/icons-material/FilterList';
-import Swal from 'sweetalert2';
 import Badge from '../../../components/bootstrap/Badge';
 import Button from '../../../components/bootstrap/Button';
 import StatusBadge from '../../../components/CustomComponent/StatusBadge';
@@ -14,6 +13,7 @@ import { formatFilters } from '../../../helpers/functions';
 import useToasterNotification from '../../../hooks/useToasterNotification';
 import Moments from '../../../helpers/Moment';
 import { buttonColor } from '../../../helpers/constants';
+import { swalFire } from '../../../helpers/swalHelper';
 
 const LicensesTable = ({ tableRef, urlBackup }: any) => {
 	const [filterEnabled, setFilterEnabled] = useState(false);
@@ -30,7 +30,7 @@ const LicensesTable = ({ tableRef, urlBackup }: any) => {
 					? `${row.plan_name} (${row.client_name})`
 					: row?.plan_name || row?.client_name || 'this license';
 
-			Swal.fire({
+			swalFire({
 				title: 'Cancel license?',
 				text: `Cancel ${displayName}?`,
 				icon: 'warning',

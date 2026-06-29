@@ -1,5 +1,4 @@
 import React, { useContext, useRef, useState } from 'react';
-// import Swal from 'sweetalert2';
 import SubHeader, {
 	SubHeaderLeft,
 	SubHeaderRight,
@@ -11,11 +10,8 @@ import Card, {
 	CardTitle,
 } from '../../components/bootstrap/Card';
 import PageWrapper from '../../layout/PageWrapper/PageWrapper';
-// import AddUsers from './AddUsers';
 import UserGroupsTableComponent from './UserGroupsTableComponent';
-// import ExportButton from '../../components/CustomComponent/Buttons/ExportButton';
 import BulkUpload from '../../components/MasterComponents/BulkUpload/BulkUploadOffCanvas';
-// import ButtonWithPopover from '../../components/CustomComponent/Buttons/ButtonWithPopover';
 import AddButton from '../../components/CustomComponent/Buttons/AddButton';
 import usePermissionHook from '../../hooks/userPermissionHook';
 import AuthContext from '../../contexts/authContext';
@@ -29,8 +25,6 @@ const Index = () => {
 	const [addModalShow, setAddModalShow] = useState(false);
 	const [addBulkModalShow, setAddBulkModalShow] = useState(false);
 	const [editId, setEditId] = useState<any>(null);
-	// const canManageUserGroup =
-	// 	usePermissionHook('manage_user_group') || usePermissionHook('manage_user');
 	const {userData}=useContext(AuthContext)
 	const tenant = userData?.active_relations?.[0]?.tenant_details || null;
 	const [activeTab, setActiveTab] = useState('All')
@@ -58,15 +52,6 @@ const Index = () => {
 					id={editId}
 				/>
 			)}
-			{/* {editModalShow && (
-				<UserForm
-					isOpen={editModalShow}
-					setIsOpen={setEditModalShow}
-					tableRef={tableRef}
-					id={dataToBeEdited}
-					title='Edit User Details'
-				/>
-			)} */} 
 			{addBulkModalShow && (
 				<BulkUpload
 					isOpen={addBulkModalShow}
@@ -88,11 +73,6 @@ const Index = () => {
 
 					</SubHeaderLeft>
 					<SubHeaderRight>
-						{/* <ButtonWithPopover 
-						  addModalShow={setAddModalShow}
-						  addBulkModalShow={setAddBulkModalShow}
-						  buttonName='Add User'
-						/> */}
 					 <AddButton modalShow={openAddModal} name='Add Group' />
 					</SubHeaderRight>
 				</SubHeader>
@@ -101,9 +81,6 @@ const Index = () => {
 						<CardLabel icon='' iconColor='info'>
 							<CardTitle tag='div' className='h5' ><p /></CardTitle>
 						</CardLabel>
-						{/* <CardActions>
-						  <ExportButton url={urlBackup} hiddenColumnsKey='' name='Users' />
-						</CardActions> */}
 					</CardHeader>
 					<CardBody className='table-responsive'><p />
 					{tenant && canSeeTenantFilter && <ButtonFiltter

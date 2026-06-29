@@ -109,6 +109,7 @@ const App = () => {
         >
           <AsideRoutes />
           <Wrapper />
+          <div id="portal-root-fullscreen" />
         </div>
         <Portal id="portal-notification">
           <ReactNotifications />

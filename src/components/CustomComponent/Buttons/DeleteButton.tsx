@@ -53,7 +53,7 @@ const DeleteButton: React.FC<DeleteButtonProps> = ({  apiEndpoint, tableRef,text
     placement='top'>
     <Button
       isOutline={false}
-      color={darkModeStatus ? 'light' : 'dark'}
+      color='danger'
       isLight
       size='sm'
       className={classNames('text-nowrap', {
