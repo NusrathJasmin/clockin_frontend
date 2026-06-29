@@ -41,6 +41,9 @@ const STATUS_CONFIG: Record<string, StatusConfig> = {
 	rejected: { styleKey: 'Cancelled', icon: 'Cancel', label: 'Rejected' },
 	invited: { styleKey: 'Scheduled', icon: 'AppRegistration', label: 'Invited' },
 	disabled: { styleKey: 'Inactive', icon: 'Block' },
+	online: { styleKey: 'Active', icon: 'CheckCircle', label: 'Online' },
+	offline: { styleKey: 'Cancelled', icon: 'CloudOff', label: 'Offline' },
+	maintenance: { styleKey: 'Scheduled', icon: 'Build', label: 'Maintenance' },
 	unknown: { styleKey: 'Check', icon: 'HelpOutline', label: 'Unknown' },
 };
 

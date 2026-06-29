@@ -27,7 +27,7 @@ const AddGroup = ({ isOpen, setIsOpen, tableRef, title, id }: any) => {
 			lead_one: null,
 			lead_two: null,
 			schedule: [],
-			site: null,
+			sites: [],
 			leave_types: [],
 		},
 	});
@@ -37,7 +37,7 @@ const AddGroup = ({ isOpen, setIsOpen, tableRef, title, id }: any) => {
 	const [parentGroupOptions, setParentGroupOptions] = useState([]);
 	const [leadOptions, setLeadOptions] = useState([]);
 	const [scheduleOptions, setScheduleOptions] = useState([]);
-	const [siteOptions, setSiteOptions] = useState([]);
+	const [sitesOptions, setSitesOptions] = useState([]);
 	const [leaveTypeOptions, setLeaveTypeOptions] = useState([]);
 	const { showErrorNotification } = useToasterNotification();
 	const isEdit = Boolean(id);
@@ -88,7 +88,7 @@ const AddGroup = ({ isOpen, setIsOpen, tableRef, title, id }: any) => {
 						value: item?.id,
 						...item,
 					})) || [];
-				setSiteOptions(siteOpts);
+				setSitesOptions(siteOpts);
 
 				const leaveTypesData = Array.isArray(leaveTypesRes?.data)
 					? leaveTypesRes.data
@@ -134,23 +134,35 @@ const AddGroup = ({ isOpen, setIsOpen, tableRef, title, id }: any) => {
 						})
 						.filter(Boolean) || [];
 
-				const rawSiteId =
-					group?.site_id ??
-					(typeof group?.site === 'object' && group?.site != null
-						? group.site?.id
-						: group?.site);
-				let selectedSite =
-					siteOpts.find((opt: any) => String(opt.value) === String(rawSiteId)) || null;
-				if (!selectedSite && group?.site != null && typeof group.site === 'object') {
-					const sid = group.site?.id;
-					if (sid != null) {
-						selectedSite = {
-							label: group.site?.name || `Site ${sid}`,
-							value: sid,
-							...group.site,
-						};
-					}
-				}
+				const rawSites = (() => {
+					if (Array.isArray(group?.sites) && group.sites.length) return group.sites;
+					if (Array.isArray(group?.sites) && group.sites.length) return group.sites;
+					if (group?.site != null) return [group.site];
+					if (group?.site != null) return [group.site];
+					return [];
+				})();
+				const selectedSites =
+					rawSites
+						.map((siteItem: any) => {
+							const siteId =
+								typeof siteItem === 'object'
+									? siteItem?.id ?? siteItem?.value
+									: siteItem;
+							if (siteId == null) return null;
+							const option = siteOpts.find(
+								(opt: any) => String(opt.value) === String(siteId),
+							);
+							if (option) return option;
+							if (typeof siteItem === 'object') {
+								return {
+									label: siteItem?.name || `Site ${siteId}`,
+									value: siteId,
+									...siteItem,
+								};
+							}
+							return null;
+						})
+						.filter(Boolean) || [];
 
 				const rawLeaveTypes =
 					group?.leave_types ??
@@ -186,7 +198,7 @@ const AddGroup = ({ isOpen, setIsOpen, tableRef, title, id }: any) => {
 					lead_one: selectedLeadOne,
 					lead_two: selectedLeadTwo,
 					schedule: selectedSchedules,
-					site: selectedSite,
+					sites: selectedSites,
 					leave_types: selectedLeaveTypes,
 				});
 				setIsLoading(false);
@@ -199,10 +211,6 @@ const AddGroup = ({ isOpen, setIsOpen, tableRef, title, id }: any) => {
 
 	const onSubmit = (data: any) => {
 		setWaitingForAxios(true);
-		const siteId =
-			data?.site?.value != null && data.site.value !== ''
-				? Number(data.site.value)
-				: null;
 		const sharedPayload = {
 			name: data?.name || '',
 			type: data?.group_type?.value || '',
@@ -211,22 +219,17 @@ const AddGroup = ({ isOpen, setIsOpen, tableRef, title, id }: any) => {
 			lead_one: data?.lead_one?.value || null,
 			lead_two: data?.lead_two?.value || null,
 			schedules: (data?.schedule || []).map((schedule: any) => schedule?.value),
+			sites: (data?.sites || [])
+				.map((siteItem: any) => Number(siteItem?.value))
+				.filter((n: number) => !Number.isNaN(n)),
 			leave_types: (data?.leave_types || [])
 				.map((lt: any) => Number(lt?.value))
 				.filter((n: number) => !Number.isNaN(n)),
 		};
 
-		const payload = isEdit
-			? { ...sharedPayload, site: siteId }
-			: {
-					...sharedPayload,
-					site_ids:
-						siteId != null && !Number.isNaN(siteId) ? [siteId] : [],
-				};
-
 		const request = isEdit
-			? authAxios.patch(`api/hr/groups/${id}/`, payload)
-			: authAxios.post('api/hr/groups/', payload);
+			? authAxios.patch(`api/hr/groups/${id}/`, sharedPayload)
+			: authAxios.post('api/hr/groups/', sharedPayload);
 
 		request
 			.then(() => {
@@ -257,7 +260,7 @@ const AddGroup = ({ isOpen, setIsOpen, tableRef, title, id }: any) => {
 									parentGroupOptions={parentGroupOptions}
 									leadOptions={leadOptions}
 									scheduleOptions={scheduleOptions}
-									siteOptions={siteOptions}
+									sitesOptions={sitesOptions}
 									leaveTypeOptions={leaveTypeOptions}
 								/>
 								<div className='row m-0'>

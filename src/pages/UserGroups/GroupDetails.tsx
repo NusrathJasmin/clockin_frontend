@@ -5,13 +5,13 @@ import Card, { CardBody, CardHeader, CardLabel, CardTitle } from '../../componen
 const GROUP_DETAIL_CARD_HEIGHT_PX = 420;
 
 const DetailRow = ({ label, value }: { label: string; value?: React.ReactNode }) => (
-	<div className='py-2 border-bottom flex-shrink-0'>
+	<div className='py-2 border-bottom'>
 		<div
 			className='text-muted small text-uppercase fw-semibold'
 			style={{ fontSize: '0.8rem', letterSpacing: '0.02em' }}>
 			{label}
 		</div>
-		<div className='fs-6 fw-semibold mt-1 text-truncate'>
+		<div className='fs-6 fw-semibold mt-1' style={{ wordBreak: 'break-word' }}>
 			{value != null && value !== '' ? value : '—'}
 		</div>
 	</div>
@@ -24,6 +24,22 @@ const formatSchedules = (group: any) => {
 		.map((s: any) => (typeof s === 'object' ? s?.name : null))
 		.filter(Boolean)
 		.join(', ');
+};
+
+const formatSites = (group: any) => {
+	if (Array.isArray(group?.sites) && group.sites.length) {
+		return group.sites
+			.map((s: any) => (typeof s === 'object' ? s?.name : null))
+			.filter(Boolean)
+			.join(', ');
+	}
+
+	return (
+		group?.site_details?.name ||
+		group?.site_name ||
+		(typeof group?.site === 'object' ? group.site?.name : null) ||
+		''
+	);
 };
 
 const GroupDetails = ({ group }: { group: any | null }) => {
@@ -53,27 +69,24 @@ const GroupDetails = ({ group }: { group: any | null }) => {
 				group.lead_two?.email
 			: null);
 
-	const siteName =
-		group?.site_details?.name ||
-		group?.site_name ||
-		(typeof group?.site === 'object' ? group.site?.name : null);
-
 	return (
-		<Card
-			className='w-100 h-100 d-flex flex-column overflow-hidden'
-			style={{
-				height: GROUP_DETAIL_CARD_HEIGHT_PX,
-				maxHeight: GROUP_DETAIL_CARD_HEIGHT_PX,
-			}}>
-			<CardHeader className='flex-shrink-0'>
-				<CardLabel icon='Info' iconColor='warning'>
-					<CardTitle tag='div' className='h5 text-warning'>
-						{group?.name || 'Group'}
-					</CardTitle>
-				</CardLabel>
-			</CardHeader>
-			<CardBody className='flex-grow-1 pt-0 overflow-hidden d-flex flex-column'>
-				<div className='d-flex flex-column justify-content-between flex-grow-1 h-100'>
+		<div className='w-100 h-100'>
+			<Card
+				className='w-100 h-100 d-flex flex-column overflow-hidden'
+				style={{
+					height: GROUP_DETAIL_CARD_HEIGHT_PX,
+					maxHeight: GROUP_DETAIL_CARD_HEIGHT_PX,
+				}}>
+				<CardHeader className='flex-shrink-0'>
+					<CardLabel icon='Info' iconColor='warning'>
+						<CardTitle tag='div' className='h5 text-warning'>
+							{group?.name || 'Group'}
+						</CardTitle>
+					</CardLabel>
+				</CardHeader>
+				<CardBody
+					className='flex-grow-1 pt-0 overflow-auto d-flex flex-column'
+					style={{ minHeight: 0 }}>
 					<DetailRow label='Type' value={group?.type} />
 					<DetailRow
 						label='Priority'
@@ -85,13 +98,13 @@ const GroupDetails = ({ group }: { group: any | null }) => {
 						}
 					/>
 					<DetailRow label='Parent group' value={parentName} />
-					<DetailRow label='1st incharge' value={leadOne} />
-					<DetailRow label='2nd incharge' value={leadTwo} />
-					<DetailRow label='Site' value={siteName} />
+					<DetailRow label='Primary Contact' value={leadOne} />
+					<DetailRow label='Secondary Contact' value={leadTwo} />
+					<DetailRow label='Sites' value={formatSites(group)} />
 					<DetailRow label='Schedules' value={formatSchedules(group)} />
-				</div>
-			</CardBody>
-		</Card>
+				</CardBody>
+			</Card>
+		</div>
 	);
 };
 

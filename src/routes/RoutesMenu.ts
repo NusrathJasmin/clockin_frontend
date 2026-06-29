@@ -29,6 +29,10 @@ export const allRoutesObject = {
 		id: 'Shift',
 		path: '/shift',
 	},
+	Doors: {
+		id: 'Doors',
+		path: '/doors',
+	},
 	RoleManagement: {
 		id: 'RoleManagement',
 		path: '/roles',
@@ -164,6 +168,12 @@ export const CompanyAdminRoutes = {
 		text: 'Shift',
 		path: '/shift',
 		icon: 'AccessTime',
+	},
+	Doors: {
+		id: 'Doors',
+		text: 'Doors',
+		path: '/doors',
+		icon: 'DoorFront',
 	},
 	RoleManagement: {
 		id: 'RoleManagement',

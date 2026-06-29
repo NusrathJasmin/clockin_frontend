@@ -3,7 +3,6 @@ import MaterialTable from '@material-table/core';
 import { ThemeProvider } from '@mui/material/styles';
 import PropTypes from 'prop-types';
 import FilterListIcon from '@mui/icons-material/FilterList';
-import Swal from 'sweetalert2';
 import Button from '../../../components/bootstrap/Button';
 import StatusBadge from '../../../components/CustomComponent/StatusBadge';
 import { authAxios } from '../../../axiosInstance';
@@ -12,6 +11,7 @@ import { formatFilters } from '../../../helpers/functions';
 import useToasterNotification from '../../../hooks/useToasterNotification';
 import Moments from '../../../helpers/Moment';
 import { buttonColor } from '../../../helpers/constants';
+import { swalFire } from '../../../helpers/swalHelper';
 
 const RegistrationsTable = ({ tableRef, urlBackup }: any) => {
 	const [filterEnabled, setFilterEnabled] = useState(false);
@@ -25,7 +25,7 @@ const RegistrationsTable = ({ tableRef, urlBackup }: any) => {
 			const isReject = status === 'REJECTED';
 			const displayName = row?.name || row?.email || 'this registration';
 
-			Swal.fire({
+			swalFire({
 				title: isReject ? 'Reject registration?' : 'Approve registration?',
 				text: isReject
 					? `Reject ${displayName}?`

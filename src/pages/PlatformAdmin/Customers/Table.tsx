@@ -5,7 +5,6 @@ import { ThemeProvider } from '@mui/material/styles';
 import { Tooltip } from '@mui/material';
 import PropTypes from 'prop-types';
 import FilterListIcon from '@mui/icons-material/FilterList';
-import Swal from 'sweetalert2';
 import Badge from '../../../components/bootstrap/Badge';
 import Button from '../../../components/bootstrap/Button';
 import StatusBadge from '../../../components/CustomComponent/StatusBadge';
@@ -15,6 +14,7 @@ import { formatFilters } from '../../../helpers/functions';
 import useToasterNotification from '../../../hooks/useToasterNotification';
 import Moments from '../../../helpers/Moment';
 import { buttonColor } from '../../../helpers/constants';
+import { swalFire } from '../../../helpers/swalHelper';
 
 const CustomersTable = ({ tableRef, urlBackup }: any) => {
 	const navigate = useNavigate();
@@ -30,7 +30,7 @@ const CustomersTable = ({ tableRef, urlBackup }: any) => {
 			const isBlock = status === 'BLOCKED';
 			const displayName = row?.name || row?.schema_name || row?.primary_domain || 'this customer';
 
-			Swal.fire({
+			swalFire({
 				title: isBlock ? 'Block customer?' : 'Activate customer?',
 				text: isBlock
 					? `Block ${displayName}? They will not be able to access the platform.`

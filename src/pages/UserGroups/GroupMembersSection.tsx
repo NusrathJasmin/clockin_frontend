@@ -14,6 +14,7 @@ import ReactSelectComponent from '../../components/CustomComponent/Select/ReactS
 import useToasterNotification from '../../hooks/useToasterNotification';
 import { buttonColor } from '../../helpers/constants';
 import { Tooltip } from '@mui/material';
+import swalFire from '../../helpers/swalHelper';
 
 const MEMBERS_CARD_HEIGHT_PX = 420;
 
@@ -227,7 +228,7 @@ const GroupMembersSection = ({ groupId }: Props) => {
 
 	const removeMembers = (userIds: number[], userLabel: string) => {
 		if (!groupId || !userIds.length) return;
-		Swal.fire({
+		swalFire({ 
 			title: 'Remove member(s)?',
 			text: `Remove ${userLabel} from this group?`,
 			icon: 'warning',

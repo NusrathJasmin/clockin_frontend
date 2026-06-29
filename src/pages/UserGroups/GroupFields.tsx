@@ -16,7 +16,7 @@ const GroupFields = ({
 	parentGroupOptions,
 	leadOptions,
 	scheduleOptions,
-	siteOptions,
+	sitesOptions,
 	leaveTypeOptions,
 }: any) => {
 	return (
@@ -82,7 +82,7 @@ const GroupFields = ({
 			<div className='col-12'>
 				<ReactSelectComponent
 					control={control}
-					name='1st Incharge'
+					name='Primary Contact'
 					isMulti={false}
 					field_name='lead_one'
 					getValues={getValues}
@@ -96,7 +96,7 @@ const GroupFields = ({
 			<div className='col-12'>
 				<ReactSelectComponent
 					control={control}
-					name='2nd Incharge'
+					name='Secondary Contact'
 					isMulti={false}
 					field_name='lead_two'
 					getValues={getValues}
@@ -122,13 +122,14 @@ const GroupFields = ({
 			<div className='col-12'>
 				<ReactSelectComponent
 					control={control}
-					name='Site *'
-					isMulti={false}
-					field_name='site'
+					name='Sites'
+					isMulti
+					field_name='sites'
 					getValues={getValues}
 					errors={errors}
-					options={siteOptions}
-					isRequired
+					options={sitesOptions}
+					isRequired={false}
+					isClearable
 				/>
 			</div>
 			<div className='col-12'>
