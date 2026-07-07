@@ -1,3 +1,36 @@
 //
 //	Badge
 //
+
+.badge {
+	@each $color, $value in $theme-colors {
+		&-light-#{$color} {
+			@include dark-mode {
+				@if $color == secondary or $color == dark {
+					background-color: rgba($white, 0.12) !important;
+					color: $gray-400 !important;
+				} @else if $color == light {
+					background-color: rgba($white, 0.1) !important;
+					color: $gray-300 !important;
+				} @else {
+					background-color: rgba($value, 0.2) !important;
+					color: tint-color($value, 15%) !important;
+				}
+			}
+		}
+	}
+
+	&-light-muted {
+		@include dark-mode {
+			background-color: rgba($white, 0.12) !important;
+			color: $gray-400 !important;
+		}
+	}
+
+	&-light-orange {
+		@include dark-mode {
+			background-color: rgba(#fd7e14, 0.2) !important;
+			color: #fd7e14 !important;
+		}
+	}
+}

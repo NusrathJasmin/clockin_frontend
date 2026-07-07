@@ -12,6 +12,11 @@ import { authAxios, publicAxios } from '../../../axiosInstance';
 import useToasterNotification from '../../../hooks/useToasterNotification';
 import { GenderOptions } from '../../../helpers/constants';
 import validateEmail from '../../../helpers/emailValidator';
+import { Player } from '@lottiefiles/react-lottie-player';
+import progressLoader from '../../../assets/Lottie/progress_loader.json';
+
+const CUSTOMER_CREATION_MESSAGE =
+	'Creating customer and setting up the customer environment. This may take a moment...';
 
 type SelectOption = { label: string; value: string };
 
@@ -73,6 +78,11 @@ const AddCustomerModal = ({ isOpen, setIsOpen, tableRef }: AddCustomerModalProps
 	const [timezonesLoading, setTimezonesLoading] = useState(false);
 	const [timezoneOptions, setTimezoneOptions] = useState<SelectOption[]>([]);
 	const { showErrorNotification, showSuccessNotification } = useToasterNotification();
+
+	const handleSetIsOpen = (open: boolean) => {
+		if (!open && saving) return;
+		setIsOpen(open);
+	};
 
 	useEffect(() => {
 		if (!isOpen) return;
@@ -138,11 +148,34 @@ const AddCustomerModal = ({ isOpen, setIsOpen, tableRef }: AddCustomerModalProps
 	};
 
 	return (
-		<Modal isOpen={isOpen} setIsOpen={setIsOpen} size='lg' isCentered isScrollable isAnimation={false}>
-			<ModalHeader className='p-4' setIsOpen={setIsOpen}>
+		<Modal
+			isOpen={isOpen}
+			setIsOpen={handleSetIsOpen}
+			size='lg'
+			isCentered
+			isScrollable
+			isAnimation={false}
+			isStaticBackdrop={saving}>
+			<ModalHeader className='p-4' setIsOpen={saving ? undefined : handleSetIsOpen}>
 				<ModalTitle id='add-customer-modal'>Add Customer</ModalTitle>
 			</ModalHeader>
-			<Form onSubmit={handleSubmit(onSubmit)}>
+			<div className='position-relative'>
+				{saving ? (
+					<div
+						className='d-flex flex-column align-items-center justify-content-center px-4'
+						style={{
+							position: 'absolute',
+							inset: 0,
+							zIndex: 10,
+							backgroundColor: 'rgba(var(--bs-body-bg-rgb), 0.92)',
+						}}>
+						<Player autoplay loop src={progressLoader} style={{ height: 160, width: 160 }} />
+						<p className='text-center mt-4 mb-0 text-muted' style={{ maxWidth: 420 }}>
+							{CUSTOMER_CREATION_MESSAGE}
+						</p>
+					</div>
+				) : null}
+				<Form onSubmit={handleSubmit(onSubmit)}>
 				<ModalBody className='px-4 pb-2'>
 					{timezonesLoading ? (
 						<div className='d-flex justify-content-center py-4'>
@@ -239,14 +272,20 @@ const AddCustomerModal = ({ isOpen, setIsOpen, tableRef }: AddCustomerModalProps
 					)}
 				</ModalBody>
 				<ModalFooter className='px-4 pb-4'>
-					<Button color='dark' isLight type='button' onClick={() => setIsOpen(false)}>
+					<Button
+						color='dark'
+						isLight
+						type='button'
+						isDisable={saving}
+						onClick={() => handleSetIsOpen(false)}>
 						Cancel
 					</Button>
 					<div className='flex-grow-1' style={{ maxWidth: '12rem' }}>
 						<SaveButton state={saving || timezonesLoading} />
 					</div>
 				</ModalFooter>
-			</Form>
+				</Form>
+			</div>
 		</Modal>
 	);
 };

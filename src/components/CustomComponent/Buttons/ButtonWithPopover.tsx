@@ -5,6 +5,7 @@ import Dropdown, {
 	DropdownToggle,
 } from '../../bootstrap/Dropdown';
 import Button from '../../bootstrap/Button';
+import useDarkMode from '../../../hooks/useDarkMode';
 
 const ButtonWithPopover = ({
 	addModalShow,
@@ -13,13 +14,16 @@ const ButtonWithPopover = ({
 	onTemplateDownload,
 	onInstructionsDownload,
 }: any) => {
+	const { darkModeStatus } = useDarkMode();
+	const buttonColor = darkModeStatus ? 'light' : 'dark';
+
 	return (
 		<Dropdown isButtonGroup >
-			<Button color='secondary' isLight icon='Add' onClick={() => addModalShow(true)}>
+			<Button color={buttonColor} isLight icon='Add' onClick={() => addModalShow(true)}>
 				{buttonName||"Add New"}
 			</Button>
 			<DropdownToggle>
-				<Button color='secondary' isLight isVisuallyHidden />
+				<Button color={buttonColor} isLight isVisuallyHidden />
 			</DropdownToggle>
 			<DropdownMenu isAlignmentEnd>
 				<DropdownItem>

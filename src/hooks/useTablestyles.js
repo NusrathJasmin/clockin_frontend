@@ -46,12 +46,12 @@ const useTablestyle = () => {
 
 	// tableStyles.js
 	const headerStyles = () => ({
-		backgroundColor: themeStatus !== 'dark' ? '#F8F9FD' : '',
+		backgroundColor: themeStatus === 'dark' ? 'rgba(255, 255, 255, 0.06)' : '#F8F9FD',
 		fontWeight: 620,
 		fontSize: '0.99rem',
 		fontFamily: 'inherit',
 		padding: '20px',
-		color:"#555555"
+		color: themeStatus === 'dark' ? '#e2e8f0' : '#555555',
 	});
 
 	const rowStyles = () => (rowData, index) => {

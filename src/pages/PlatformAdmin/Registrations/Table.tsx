@@ -12,11 +12,14 @@ import useToasterNotification from '../../../hooks/useToasterNotification';
 import Moments from '../../../helpers/Moment';
 import { buttonColor } from '../../../helpers/constants';
 import { swalFire } from '../../../helpers/swalHelper';
+import { Player } from '@lottiefiles/react-lottie-player';
+import progressLoader from '../../../assets/Lottie/progress_loader.json';
 
 const RegistrationsTable = ({ tableRef, urlBackup }: any) => {
 	const [filterEnabled, setFilterEnabled] = useState(false);
 	const [pageSize, setPageSize] = useState(10);
 	const [sortState, setSortState] = useState({ orderBy: null, orderDirection: 'asc' });
+	const [actionLoadingMessage, setActionLoadingMessage] = useState<string | null>(null);
 	const { theme, rowStyles, headerStyles } = useTablestyle();
 	const { showErrorNotification, showSuccessNotification } = useToasterNotification();
 
@@ -49,6 +52,12 @@ const RegistrationsTable = ({ tableRef, urlBackup }: any) => {
 					payload.rejection_reason = result.value.trim();
 				}
 
+				setActionLoadingMessage(
+					isReject
+						? 'Rejecting registration...'
+						: 'Approving registration and setting up the customer environment. This may take a moment...',
+				);
+
 				authAxios
 					.patch(`api/customers/registrations/${row.id}/`, payload)
 					.then((response) => {
@@ -61,7 +70,8 @@ const RegistrationsTable = ({ tableRef, urlBackup }: any) => {
 								: 'Registration approved successfully.');
 						showSuccessNotification(message);
 					})
-					.catch((error) => showErrorNotification(error));
+					.catch((error) => showErrorNotification(error))
+					.finally(() => setActionLoadingMessage(null));
 			});
 		},
 		[tableRef, showErrorNotification, showSuccessNotification],
@@ -156,6 +166,21 @@ const RegistrationsTable = ({ tableRef, urlBackup }: any) => {
 
 	return (
 		<div className='material-table-wrapper'>
+			{actionLoadingMessage ? (
+				<div
+					className='d-flex flex-column align-items-center justify-content-center'
+					style={{
+						position: 'fixed',
+						inset: 0,
+						zIndex: 1055,
+						backgroundColor: 'rgba(var(--bs-body-bg-rgb), 0.92)',
+					}}>
+					<Player autoplay loop src={progressLoader} style={{ height: 160, width: 160 }} />
+					<p className='text-center mt-4 px-4 mb-0 text-muted' style={{ maxWidth: 420 }}>
+						{actionLoadingMessage}
+					</p>
+				</div>
+			) : null}
 			<ThemeProvider theme={theme}>
 				<MaterialTable
 					key={`${sortState.orderBy ?? 'no-order'}-${sortState.orderDirection}`}

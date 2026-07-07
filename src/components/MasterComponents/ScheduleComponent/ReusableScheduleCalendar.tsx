@@ -259,7 +259,7 @@ const ReusableScheduleCalendar = ({
 			const sdName = String((sd as { name?: string }).name || '').trim();
 			if (sdName) lines.push(sdName);
 			const shiftLines = shiftLabelsFromShiftsField((sd as { shifts?: unknown }).shifts);
-			if (shiftLines.length) lines.push(summarizeShiftLabels(shiftLines, 2));
+			if (shiftLines.length) lines.push(...shiftLines);
 		}
 
 		const sched = row?.schedule;
@@ -269,7 +269,7 @@ const ReusableScheduleCalendar = ({
 			const shiftSource =
 				typeof sched === 'object' && !Array.isArray(sched) ? (sched as { shifts?: unknown }).shifts : sched;
 			const shiftLines = shiftLabelsFromShiftsField(shiftSource);
-			if (shiftLines.length) lines.push(summarizeShiftLabels(shiftLines, 2));
+			if (shiftLines.length) lines.push(...shiftLines);
 		}
 
 		if (!lines.length) {
@@ -334,11 +334,9 @@ const ReusableScheduleCalendar = ({
 		const statusMeta = getStatusMeta(dayStatus);
 		if (!statusMeta) return;
 		let title = statusMeta.label;
-		if (normalizeStatusKey(dayStatus) === 'PRESENT') {
-			const workedHrs = getTotalWorkedHrs(row);
-			if (workedHrs != null) {
-				title = `${title}\nWorked: ${workedHrs}hrs`;
-			}
+		const workedHrs = getTotalWorkedHrs(row);
+		if (workedHrs != null && workedHrs > 0) {
+			title = `${title}\nWorked: ${workedHrs}hrs`;
 		}
 		if (calendarType === 'group') {
 			const counts = getGroupDayScheduleCounts(row);
@@ -673,7 +671,6 @@ const ReusableScheduleCalendar = ({
 										border: 'none',
 										boxShadow: 'none',
 										padding: '2px 3px',
-										pointerEvents: 'none',
 									},
 								};
 							}

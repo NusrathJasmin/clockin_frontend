@@ -16,7 +16,6 @@ import validateEmail from '../../helpers/emailValidator';
 import { GenderOptions } from '../../helpers/constants';
 import showNotification from '../../components/extras/showNotification';
 import Error from '../../helpers/Error';
-import { getDefaultAuthPath } from '../../helpers/baseURL';
 import AbaciLoader from '../../components/AbaciLoader/AbaciLoader';
 import PageWrapper from '../../layout/PageWrapper/PageWrapper';
 import Page from '../../layout/Page/Page';
@@ -168,6 +167,24 @@ const Signup = () => {
 			});
 	};
 
+	const resetSignupFlow = () => {
+		setEmailVerified(false);
+		setVerifiedEmail('');
+		setTimezoneOptions([]);
+		emailFormik.resetForm();
+		signupFormik.resetForm({
+			values: {
+				name: '',
+				email: '',
+				first_name: '',
+				last_name: '',
+				gender: 'Other',
+				country: '',
+				timezone: '',
+			},
+		});
+	};
+
 	const handleSignup = (values) => {
 		setWaitingForAxios(true);
 
@@ -190,7 +207,7 @@ const Signup = () => {
 					response?.data?.detail ||
 					'Account created successfully. Please sign in.';
 				showNotification('Success', message, 'success');
-				navigate(getDefaultAuthPath());
+				resetSignupFlow();
 			})
 			.catch((error) => {
 				setWaitingForAxios(false);

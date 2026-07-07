@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
+import classNames from 'classnames';
 import Swal from 'sweetalert2';
 import { Form } from 'reactstrap';
 import { useForm } from 'react-hook-form';
@@ -221,9 +222,9 @@ const DocumentListItem = ({
 	);
 };
 
-type Props = { userId?: string };
+type Props = { userId?: string; fillHeight?: boolean };
 
-const UserDocumentsSection = ({ userId }: Props) => {
+const UserDocumentsSection = ({ userId, fillHeight = false }: Props) => {
 	const [documents, setDocuments] = useState<UserDocument[]>([]);
 	const [loading, setLoading] = useState(false);
 	const [addOpen, setAddOpen] = useState(false);
@@ -292,10 +293,14 @@ const UserDocumentsSection = ({ userId }: Props) => {
 	if (!userId) return null;
 
 	return (
-		<div className='w-100'>
+		<div className={classNames('w-100', fillHeight && 'h-100 d-flex')}>
 			<Card
-				className='d-flex flex-column overflow-hidden'
-				style={{ height: DOCUMENTS_CARD_HEIGHT_PX, maxHeight: DOCUMENTS_CARD_HEIGHT_PX }}>
+				className={classNames('d-flex flex-column overflow-hidden w-100', fillHeight && 'h-100')}
+				style={
+					fillHeight
+						? undefined
+						: { height: DOCUMENTS_CARD_HEIGHT_PX, maxHeight: DOCUMENTS_CARD_HEIGHT_PX }
+				}>
 				<CardHeader className='flex-shrink-0'>
 					<CardLabel icon='Description' iconColor='warning'>
 						<CardTitle tag='div' className='h5 text-warning'>

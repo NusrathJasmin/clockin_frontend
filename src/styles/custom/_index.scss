@@ -391,9 +391,37 @@ overflow-x: hidden;
 }
 
 
+[theme='dark'] {
+	.bulk-upload-offcanvas {
+		.form-control[type='file'] {
+			color: #e2e8f0;
+
+			&::file-selector-button {
+				background-color: rgba(255, 255, 255, 0.08);
+				border-color: rgba(255, 255, 255, 0.15);
+				color: #e2e8f0;
+			}
+		}
+	}
+}
+
 .upload-instructions {
     color: #1a1a1a;
     user-select: none;
+
+	@include dark-mode {
+		color: #e2e8f0;
+	}
+
+	.bulk-upload-download-link {
+		color: #4d69fa;
+		margin-left: 3px;
+		cursor: pointer;
+
+		@include dark-mode {
+			color: #8ba2ff;
+		}
+	}
 }
 .download-temp{
     margin-bottom: 0px;
@@ -578,6 +606,15 @@ overflow-x: hidden;
   .material-table-wrapper{
    overflow: auto;
   }
+
+[theme='dark'] {
+	.material-table-wrapper {
+		.MuiTableCell-head,
+		th[role='columnheader'] {
+			color: #e2e8f0 !important;
+		}
+	}
+}
 
 
 
@@ -1072,6 +1109,19 @@ overflow-x: hidden;
 		padding: 0 3px 3px;
 	}
 
+	&--clickable {
+		.rbc-row-content {
+			pointer-events: none;
+		}
+
+		.rbc-event,
+		.rbc-status-event-card,
+		.rbc-shift-event-card {
+			pointer-events: auto !important;
+			cursor: pointer;
+		}
+	}
+
 	// Default RBC truncates event content to a single ellipsized line — override so our
 	// multi-line schedule name / time chips render fully instead of getting clipped.
 	.rbc-event-content {
@@ -1101,12 +1151,34 @@ overflow-x: hidden;
 		width: 100%;
 	}
 
+	.rbc-status-event-card__row {
+		display: flex;
+		align-items: baseline;
+		justify-content: space-between;
+		gap: 0.35rem;
+		width: 100%;
+		min-width: 0;
+	}
+
 	.rbc-status-event-card__primary {
 		font-size: 0.74rem;
 		font-weight: 700;
 		line-height: 1.3;
 		white-space: normal;
 		word-break: break-word;
+		min-width: 0;
+		flex: 1 1 auto;
+	}
+
+	.rbc-status-event-card__worked {
+		font-size: 0.66rem;
+		font-weight: 500;
+		line-height: 1.25;
+		opacity: 0.82;
+		white-space: nowrap;
+		flex-shrink: 0;
+		margin-left: auto;
+		text-align: right;
 	}
 
 	.rbc-status-event-card__detail {
@@ -1133,6 +1205,7 @@ overflow-x: hidden;
 	}
 
 	.rbc-shift-event-card__detail {
+		display: block;
 		font-size: 0.66rem;
 		font-weight: 600;
 		line-height: 1.25;

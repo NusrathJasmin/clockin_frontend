@@ -6,6 +6,8 @@ import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import CancelOutlinedIcon from '@mui/icons-material/CancelOutlined';
 import EventBusyOutlinedIcon from '@mui/icons-material/EventBusyOutlined';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
+import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
+import Tooltip from '@mui/material/Tooltip';
 import { authAxios } from '../../axiosInstance';
 import AbaciLoader from '../../components/AbaciLoader/AbaciLoader';
 import useToasterNotification from '../../hooks/useToasterNotification';
@@ -133,6 +135,9 @@ const LEAVE_STATUS_LABELS: Record<string, string> = {
 	REJECTED: 'Rejected',
 	CANCELLED: 'Cancelled',
 };
+
+const LEAVE_SUMMARY_TOOLTIP =
+	'Shows the current year\'s leave request statistics by status.';
 
 const leaveStatusTheme = (status: string): DashboardTone => {
 	const key = String(status || '').trim().toUpperCase();
@@ -314,7 +319,17 @@ const DashboardLeaveRequestsSummary = () => {
 			<div className='d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3'>
 				<div className='hr-dashboard__section-title mb-0'>
 					<EventBusyOutlinedIcon fontSize='small' />
-					Leave requests
+					<span className='d-inline-flex align-items-center gap-1'>
+						Leave requests
+						<Tooltip title={LEAVE_SUMMARY_TOOLTIP} arrow placement='top'>
+							<span
+								className='d-inline-flex align-items-center'
+								style={{ cursor: 'help', color: 'inherit' }}
+								aria-label='Leave summary information'>
+								<InfoOutlinedIcon sx={{ fontSize: '1rem', color: 'inherit' }} />
+							</span>
+						</Tooltip>
+					</span>
 				</div>
 				<Link to={allRoutesObject.LeaveRequests.path} className='hr-dashboard__view-link mt-0'>
 					View all

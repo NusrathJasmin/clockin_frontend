@@ -290,7 +290,7 @@ const LeaveRequests = ({
 						<AcceptandRejectBasedOnStatus
 							id={rowData.id}
 							tableRef={tableRef}
-							url='/api/hr/leave-requests/'
+							url='/api/hr/leave-requests'
 							status={leaveRequestRowStatus(rowData) ?? ''}
 							canApprove={rowData?.actions?.can_approve}
 							canReject={rowData?.actions?.can_reject}
@@ -301,7 +301,7 @@ const LeaveRequests = ({
 						<AcceptandRejectBasedOnStatus
 							id={rowData.id}
 							tableRef={tableRef}
-							url='/api/hr/leave-requests/'
+							url='/api/hr/leave-requests'
 							status={leaveRequestRowStatus(rowData) ?? ''}
 							canApprove={false}
 							canReject={false}

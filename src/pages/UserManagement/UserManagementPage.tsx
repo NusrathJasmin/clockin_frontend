@@ -9,7 +9,9 @@ import UserDetails from '../../components/MasterComponents/Usermanagement/Detail
 import UserScheduleCalendarSection from '../../components/MasterComponents/Usermanagement/Details/UserScheduleCalendarSection';
 import UserDetailSkeleton from '../../components/CustomComponent/Skeleton/UserDetailSkeleton';
 import UserTodayInfoCard from '../../components/MasterComponents/Usermanagement/Details/UserTodayInfoCard';
+import UserGroupsCard from '../../components/MasterComponents/Usermanagement/Details/UserGroupsCard';
 import UserDocumentsSection from '../../components/MasterComponents/Usermanagement/Details/UserDocumentsSection';
+
 const UserManagementPage = () => {
 	const { id } = useParams();
 	const [userReady, setUserReady] = useState(false);
@@ -38,25 +40,34 @@ const UserManagementPage = () => {
 				{showPageLoader && <UserDetailSkeleton />}
 				<div className={showPageLoader ? 'd-none' : undefined}>
 					<div className='row g-4 align-items-stretch'>
-						<div className='col-12 col-lg-6 mb-4 d-flex flex-column'>
-							<div className='mb-4'>
-								<UserDetails userId={id} onLoadComplete={onUserLoadComplete} />
-							</div>
-							<div className='flex-grow-1'>
-								<UserTodayInfoCard userId={id} fillHeight />
-							</div>
+						<div className='col-12 col-lg-6 d-flex'>
+							<UserDetails userId={id} onLoadComplete={onUserLoadComplete} fillHeight />
 						</div>
 						{userReady && (
-							<div className='col-12 col-lg-6 mb-4 d-flex flex-column'>
-								<UserDocumentsSection userId={id} />
+							<div className='col-12 col-lg-6 d-flex'>
+								<UserDocumentsSection userId={id} fillHeight />
 							</div>
 						)}
-						{userReady ? (
+					</div>
+
+					{userReady ? (
+						<div className='row g-4 align-items-stretch mt-0'>
+							<div className='col-12 col-lg-6 d-flex'>
+								<UserTodayInfoCard userId={id} fillHeight />
+							</div>
+							<div className='col-12 col-lg-6 d-flex'>
+								<UserGroupsCard userId={id} fillHeight />
+							</div>
+						</div>
+					) : null}
+
+					{userReady ? (
+						<div className='row g-4 mt-0'>
 							<div className='col-12'>
 								<UserScheduleCalendarSection userId={id} />
 							</div>
-						) : null}
-					</div>
+						</div>
+					) : null}
 				</div>
 			</Page>
 		</PageWrapper>

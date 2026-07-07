@@ -22,22 +22,18 @@ const ImportInstructions = ({ api, fileName, templateApi, instructionsApi, instr
 					<p className='highlight download-temp'>Download the Template:</p> Click on the
 					provided link to download the sample template
 					<span
+						className='bulk-upload-download-link'
 						onClick={() => downloadHandler(resolvedTemplateApi, fileName,setIsloading)}
-						style={{
-							color: '#4D69FA',
-							marginLeft: '3px',
-							cursor: 'pointer',
-						}}
 						onKeyDown={handleKeyDown}
 						tabIndex={0}
 						role='button'
 						aria-label={`Download ${fileName} template`}>
 						<u>{fileName}</u>
 						<DescriptionIcon
+							className='bulk-upload-download-link'
 							style={{
 								fontSize: '18px',
 								marginTop: '-5px',
-								color: '#4D69FA',
 								marginLeft: '5px',
 							}}
 						/>
@@ -49,23 +45,19 @@ const ImportInstructions = ({ api, fileName, templateApi, instructionsApi, instr
 						<p className='highlight download-temp'>Optional Instructions:</p> Download the
 						import instruction file
 						<span
+							className='bulk-upload-download-link'
 							onClick={() =>
 								downloadHandler(instructionsApi, resolvedInstructionsFileName, setIsloading)
 							}
-							style={{
-								color: '#4D69FA',
-								marginLeft: '3px',
-								cursor: 'pointer',
-							}}
 							tabIndex={0}
 							role='button'
 							aria-label='Download import instructions'>
 							<u>{resolvedInstructionsFileName}</u>
 							<DescriptionIcon
+								className='bulk-upload-download-link'
 								style={{
 									fontSize: '18px',
 									marginTop: '-5px',
-									color: '#4D69FA',
 									marginLeft: '5px',
 								}}
 							/>

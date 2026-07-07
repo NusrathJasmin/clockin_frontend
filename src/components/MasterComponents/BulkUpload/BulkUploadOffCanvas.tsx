@@ -74,16 +74,14 @@ const BulkUpload = ({
 			{uploadError && (
 			  <Card>
 				<CardBody>
-				<div style={{ width:'100%',}}  >
-				<p >Message : {message}</p>
-
+				<div className='w-100 text-body'>
+				<p className='mb-3'>Message: {message}</p>
 				</div>
-				  <div style={{ color: 'red' }}>
-				
-					<h5>Error</h5>
-					<ul>
+				  <div className='text-danger'>
+					<h5 className='text-danger'>Error</h5>
+					<ul className='mb-0'>
 					  {Object.entries(uploadError).map(([key, value]) => (
-						<li key={key}>
+						<li key={key} className='text-body'>
 						  {key}:
 						 { /* eslint-disable no-nested-ternary */}
 
@@ -126,9 +124,9 @@ const BulkUpload = ({
 			{warnings && (
 			  <Card>
 				<CardBody>
-				  <div style={{ color: 'red' }}>
-					<h5>Warnings</h5>
-					{warnings}
+				  <div className='text-warning'>
+					<h5 className='text-warning'>Warnings</h5>
+					<div className='text-body'>{warnings}</div>
 				  </div>
 				</CardBody>
 			  </Card>
@@ -155,7 +153,7 @@ const BulkUpload = ({
 						})}
 					  />
 					  {errors?.file?.type === 'required' ? (
-						<span style={{ color: 'red' }}>*This field is required</span>
+						<span className='text-danger small'>*This field is required</span>
 					  ) : (
 						<p />
 					  )}
@@ -175,8 +173,8 @@ const BulkUpload = ({
 	  
 
 	return (
-		<OffCanvasComponent isOpen={isOpen} placement='end' title={title} setOpen={setIsOpen}>	
-			{renderComponent()}
+		<OffCanvasComponent isOpen={isOpen} placement='end' title={title} setOpen={setIsOpen}>
+			<div className='bulk-upload-offcanvas'>{renderComponent()}</div>
 		</OffCanvasComponent>
 	);
 };

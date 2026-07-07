@@ -56,7 +56,16 @@ const timestampForTimeline = (data: any): string | null => {
 	return at != null && String(at).trim() !== '' ? String(at) : null;
 };
 
-const remarksDisplayForTimeline = (data: any): string => {
+const formatWorkedHrsTillNow = (data: any): string | null => {
+	const raw = data?.worked_hrs_till_now ?? data?.worked_hours_till_now;
+	if (raw == null || raw === '') return null;
+	const n = Number(raw);
+	if (Number.isFinite(n)) return `Worked: ${n}hrs`;
+	const s = String(raw).trim();
+	return s ? `Worked: ${s}` : null;
+};
+
+const remarksDisplayForTimeline = (data: any, showWorkedHrsTillNow = false) => {
 	if (isEventDeleted(data)) {
 		const typeLabel = eventTypeLabel(data);
 		const deletedBy = formatEnteredBy(data?.deleted_by);
@@ -65,15 +74,17 @@ const remarksDisplayForTimeline = (data: any): string => {
 			? `${eventPrefix}removed by ${deletedBy}`
 			: `${eventPrefix}removed`;
 	}
-	const entered = formatEnteredBy(data?.entered_by);
 	const method =
 		data?.method != null && String(data.method).trim() !== ''
 			? String(data.method).trim()
 			: null;
-	const descParts = [
-		entered ? `Entered by ${entered}` : null,
-		method ? `Method: ${method}` : null,
-	].filter(Boolean);
+	const primaryDetail = showWorkedHrsTillNow
+		? formatWorkedHrsTillNow(data)
+		: (() => {
+				const entered = formatEnteredBy(data?.entered_by);
+				return entered ? `Entered by ${entered}` : null;
+			})();
+	const descParts = [primaryDetail, method ? `Method: ${method}` : null].filter(Boolean);
 	return descParts.join(' · ') || '—';
 };
 
@@ -98,6 +109,8 @@ export type AttendanceEventsTimelineProps = {
 	maxHeight?: string;
 	showActions?: boolean;
 	actionDisabled?: boolean;
+	/** When true, shows worked_hrs_till_now instead of entered_by in event details. */
+	showWorkedHrsTillNow?: boolean;
 	onEdit?: (event: any) => void;
 	onDelete?: (event: any) => void;
 };
@@ -109,6 +122,7 @@ const AttendanceEventsTimeline = ({
 	maxHeight = DEFAULT_TIMELINE_SCROLL_MAX_HEIGHT,
 	showActions = false,
 	actionDisabled = false,
+	showWorkedHrsTillNow = false,
 	onEdit,
 	onDelete,
 }: AttendanceEventsTimelineProps) => {
@@ -155,7 +169,7 @@ const AttendanceEventsTimeline = ({
 				{items.map((data, index) => {
 					const key = data?.id ?? `${data?.event_type}-${data?.timestamp}-${index}`;
 					const deleted = isEventDeleted(data);
-					const desc = remarksDisplayForTimeline(data);
+					const desc = remarksDisplayForTimeline(data, showWorkedHrsTillNow);
 					const statusText = statusDisplayTextForTimeline(data);
 					const statusColor = timelineHexForEvent(data);
 					const displayTimestamp = timestampForTimeline(data);

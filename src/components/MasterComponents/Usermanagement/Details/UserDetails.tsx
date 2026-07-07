@@ -134,10 +134,10 @@ const UserDetails = ({
 						<DetailRow label='User type' value={formatUserType(user)} />
 						{/* <DetailRow label='Access category' value={user?.access_category?.category} /> */}
 						<DetailRow
-						label='Group'
+						label='Department'
 						value={
-							user?.groups?.map((group: { name: string }) => group.name).join(', ') ||
-							rel?.group_name ||
+							user?.departments?.map((department: { name: string }) => department.name).join(', ') ||
+							rel?.department_name ||
 							'—'
 						}
 					/>

@@ -32,7 +32,7 @@ import {
 	shiftLabelsFromShiftsField,
 	summarizeShiftLabels,
 } from '../../../../pages/Schedule/scheduleShiftUtils';
-
+import useDarkMode from '../../../../hooks/useDarkMode';
 type UserCalendarDetailModalProps = {
 	isOpen: boolean;
 	setIsOpen: (open: boolean) => void;
@@ -232,10 +232,8 @@ const collectOtAttendanceEntries = (attendance: unknown): [string, unknown][] =>
 	if (attendance == null || typeof attendance !== 'object' || Array.isArray(attendance)) return [];
 	return Object.entries(attendance as Record<string, unknown>).filter(([k, v]) => {
 		if (!isOtAttendanceKey(k)) return false;
-		if (/ot_mins|ot_minutes|overtime_mins/i.test(k)) {
-			const n = Number(v);
-			return Number.isFinite(n) && n > 0;
-		}
+		// ot_mins is shown separately as "Recorded OT"
+		if (/ot_mins|ot_minutes|overtime_mins/i.test(k)) return false;
 		return v != null && v !== '' && v !== 0;
 	});
 };
@@ -536,6 +534,8 @@ const UserCalendarDetailModal = ({
 		Boolean(userId) &&
 		Boolean(apiDate) &&
 		(isAdmin || Number(userData?.id) === Number(userId));
+
+	const { darkModeStatus } = useDarkMode();
 
 	const close = () => setIsOpen(false);
 
@@ -993,6 +993,7 @@ const UserCalendarDetailModal = ({
 				setIsOpen={setIsOpen}
 				size='lg'
 				isScrollable
+				isAnimation={false}
 				isCentered
 				isStaticBackdrop>
 			<ModalHeader className='p-0 user-calendar-day-modal-header' setIsOpen={setIsOpen}>
@@ -1066,8 +1067,8 @@ const UserCalendarDetailModal = ({
 											/>
 											{canManageAttendance && (
 												<Button
-													size='sm'
-													color='secondary'
+													size='sm'	
+													color={darkModeStatus ? 'light' : 'dark'}
 													isLight
 													isDisable={
 														attendanceLoading || clockActionLoading || isFutureDay
@@ -1093,7 +1094,7 @@ const UserCalendarDetailModal = ({
 										{isAdmin && !scheduleEditMode && !attendanceDeleted && (
 											<Button
 												size='sm'
-												color='secondary'
+												color={darkModeStatus ? 'light' : 'dark'}
 												isLight
 												onClick={() => setScheduleEditMode(true)}>
 												Change schedule
@@ -1183,7 +1184,7 @@ const UserCalendarDetailModal = ({
 												{canApplyLeave && (
 													<Button
 														size='sm'
-														color='secondary'
+														color={darkModeStatus ? 'light' : 'dark'}
 														isLight
 														onClick={openLeaveApply}>
 														+ Apply
@@ -1282,7 +1283,7 @@ const UserCalendarDetailModal = ({
 												</div>
 											) : showOtEmpty ? (
 												<span className='text-muted small'>No OT data</span>
-											) : (
+											) : otAttendanceEntries.length > 0 ? (
 												<div className='small d-flex flex-column gap-1'>
 													{otAttendanceEntries.map(([k, v]) => (
 														<div key={k} className='d-flex justify-content-between'>
@@ -1291,7 +1292,7 @@ const UserCalendarDetailModal = ({
 														</div>
 													))}
 												</div>
-											)}
+											) : null}
 										</div>
 									</div>
 								</div>
@@ -1308,7 +1309,7 @@ const UserCalendarDetailModal = ({
 									{canManageAttendance && (
 										<Button
 											size='sm'
-											color='secondary'
+											color={darkModeStatus ? 'light' : 'dark'}
 											isLight
 											isDisable={attendanceLoading || clockActionLoading || isFutureDay}
 											onClick={handleMarkAttendanceEvent}>
@@ -1329,6 +1330,7 @@ const UserCalendarDetailModal = ({
 									<AttendanceEventsTimeline
 										events={attendanceEvents}
 										maxHeight='min(24rem, 50vh)'
+										showWorkedHrsTillNow
 										showActions={canManageAttendance}
 										actionDisabled={attendanceLoading || clockActionLoading || isFutureDay}
 										onEdit={handleEditAttendanceEvent}
@@ -1436,14 +1438,14 @@ const UserCalendarDetailModal = ({
 				</ModalBody>
 				<ModalFooter className='px-4 pb-4'>
 					<Button
-						color='secondary'
+						color={darkModeStatus ? 'light' : 'dark'}
 						isLight
 						isDisable={leaveApplySaving}
 						onClick={() => setLeaveApplyMode(false)}>
 						Cancel
 					</Button>
 					<Button
-						color='dark'
+						color={darkModeStatus ? 'light' : 'dark'}
 						isDisable={leaveApplySaving || leaveTypesLoading}
 						onClick={handleLeaveSubmit(submitLeaveApplication)}>
 						{leaveApplySaving ? 'Submitting…' : 'Submit'}

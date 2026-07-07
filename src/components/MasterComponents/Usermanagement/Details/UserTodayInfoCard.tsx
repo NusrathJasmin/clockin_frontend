@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import classNames from 'classnames';
 import dayjs from 'dayjs';
-import Chip from '@mui/material/Chip';
 import { authAxios } from '../../../../axiosInstance';
 import Card, { CardBody, CardHeader, CardLabel, CardTitle } from '../../../bootstrap/Card';
 import CustomSpinner from '../../../CustomSpinner/CustomSpinner';
@@ -11,6 +10,31 @@ import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import StatusBadge from '../../../CustomComponent/StatusBadge';
 
 type Props = { userId?: string; fillHeight?: boolean };
+
+const LABEL_ICON_SX = { fontSize: 18, flexShrink: 0, display: 'block' } as const;
+
+const TodayInfoLabel = ({
+	icon,
+	children,
+}: {
+	icon?: React.ReactNode;
+	children: React.ReactNode;
+}) => (
+	<div className='d-flex align-items-center gap-2 text-warning fw-semibold fs-6 mb-2'>
+		{icon ? (
+			<span className='d-inline-flex align-items-center justify-content-center flex-shrink-0'>
+				{icon}
+			</span>
+		) : (
+			<span className='flex-shrink-0' style={{ width: 18 }} aria-hidden />
+		)}
+		<span className='lh-sm'>{children}</span>
+	</div>
+);
+
+const TodayInfoValue = ({ children }: { children: React.ReactNode }) => (
+	<div className='fw-semibold lh-base'>{children}</div>
+);
 
 const UserTodayInfoCard = ({ userId, fillHeight = false }: Props) => {
     const [detail, setDetail] = useState<any | null>(null);
@@ -51,27 +75,29 @@ const UserTodayInfoCard = ({ userId, fillHeight = false }: Props) => {
                     </CardTitle>
                 </CardLabel>
             </CardHeader>
-            <CardBody className={fillHeight ? 'd-flex flex-column flex-grow-1 justify-content-center' : undefined}>
+            <CardBody className={fillHeight ? 'd-flex flex-column flex-grow-1' : undefined}>
                 {loading ? (
                     <div className='d-flex justify-content-center py-4'>
                         <CustomSpinner />
                     </div>
                 ) : (
-                    <div className='row g-3'>
-                        <div className='col-12 col-md-3'>
-                            <div className='text-warning fw-semibold fs-6 mb-2'>Status</div>
-                            <StatusBadge
-                                status={detail?.status || 'Not Available'}
-                                emptyFallback='Not Available'
-                            />
+                    <div className='row g-3 align-items-start'>
+                        <div className='col-12 col-md-6 col-xl-3 d-flex flex-column'>
+                            <TodayInfoLabel>Status</TodayInfoLabel>
+                            <TodayInfoValue>
+                                <StatusBadge
+                                    status={detail?.status || 'Not Available'}
+                                    emptyFallback='Not Available'
+                                />
+                            </TodayInfoValue>
                         </div>
-                        <div className='col-12 col-md-3'>
-                            <div className='text-warning fw-semibold fs-6 mb-2'>
-                                <CalendarTodayIcon fontSize='small' /> Schedule
-                            </div>
-                            <div className='fw-semibold'>
+                        <div className='col-12 col-md-6 col-xl-3 d-flex flex-column'>
+                            <TodayInfoLabel icon={<CalendarTodayIcon sx={LABEL_ICON_SX} />}>
+                                Schedule
+                            </TodayInfoLabel>
+                            <TodayInfoValue>
                                 {Array.isArray(detail?.schedule) && detail.schedule.length > 0 ? (
-                                    <ul className='mb-0 ps-3 fw-semibold small'>
+                                    <ul className='list-unstyled mb-0'>
                                         {detail.schedule.map((s: any, i: number) => (
                                             <li key={i}>
                                                 {typeof s === 'string' || typeof s === 'number'
@@ -81,35 +107,38 @@ const UserTodayInfoCard = ({ userId, fillHeight = false }: Props) => {
                                         ))}
                                     </ul>
                                 ) : (
-                                    <div className='fw-semibold'>None</div>
+                                    'None'
                                 )}
-                                {Array.isArray(detail?.special_day) && detail.special_day.length > 0 && (
-                                    <ul className='text-muted small mt-1 mb-0 ps-3'>
+                                {Array.isArray(detail?.special_day) && detail.special_day.length > 0 ? (
+                                    <ul className='list-unstyled text-muted small mt-1 mb-0'>
                                         {detail.special_day.map((sd: any, i: number) => (
-                                            <li key={i}>{typeof sd === 'object' ? sd?.name ?? '—' : String(sd)}</li>
+                                            <li key={i}>
+                                                {typeof sd === 'object' ? sd?.name ?? '—' : String(sd)}
+                                            </li>
                                         ))}
                                     </ul>
-                                )}
-                            </div>
-
+                                ) : null}
+                            </TodayInfoValue>
                         </div>
-                        <div className='col-12 col-md-3'>
-                                <div className='text-warning fw-semibold fs-6 mb-2'>
-                                    <HistoryToggleOffIcon fontSize='small' /> Leave
-                            </div>
-                            <div className='fw-semibold'>
-                                {detail?.leave_requests.length
-                                    ? detail?.leave_requests.map((l: any) => l?.leave_type?.name || 'Leave').join(', ')
+                        <div className='col-12 col-md-6 col-xl-3 d-flex flex-column'>
+                            <TodayInfoLabel icon={<HistoryToggleOffIcon sx={LABEL_ICON_SX} />}>
+                                Leave
+                            </TodayInfoLabel>
+                            <TodayInfoValue>
+                                {detail?.leave_requests?.length
+                                    ? detail.leave_requests
+                                          .map((l: any) => l?.leave_type?.name || 'Leave')
+                                          .join(', ')
                                     : 'None'}
-                            </div>
+                            </TodayInfoValue>
                         </div>
-                        <div className='col-12 col-md-3'>
-                            <div className='text-warning fw-semibold fs-6 mb-2'>
-                                <AccessTimeIcon fontSize='small' className='text-warning' /> Overtime
-                            </div>
-                            <div className='fw-semibold'>
+                        <div className='col-12 col-md-6 col-xl-3 d-flex flex-column'>
+                            <TodayInfoLabel icon={<AccessTimeIcon sx={LABEL_ICON_SX} />}>
+                                Overtime
+                            </TodayInfoLabel>
+                            <TodayInfoValue>
                                 {detail?.overtime || detail?.ot ? detail?.overtime || detail?.ot : 'None'}
-                            </div>
+                            </TodayInfoValue>
                         </div>
                     </div>
                 )}

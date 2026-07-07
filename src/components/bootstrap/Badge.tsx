@@ -1,7 +1,6 @@
 import React, { FC, ReactNode } from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
-import useDarkMode from '../../hooks/useDarkMode';
 import { TColor } from '../../type/color-type';
 
 interface IBadgeProps extends Record<string, any> {
@@ -33,17 +32,17 @@ const Badge: FC<IBadgeProps> = ({
 	isLight,
 	...props
 }) => {
-	const { darkModeStatus } = useDarkMode();
 	return (
 		<span
 			className={classNames(
 				'badge',
-				{   
+				{
 					[`bg-${color}`]: !isLight,
-					[`bg-l${darkModeStatus ? 'o25' : '10'}-${color}`]: isLight,
-					[`text-${color}`]: isLight,
+					[`bg-l10-${color}`]: isLight,
+					[`badge-light-${color}`]: isLight,
+					[`text-${color}`]: isLight && color !== 'light',
 					[`shadow${shadow !== 'default' ? `-${shadow}` : ''}`]: !!shadow,
-					[`text-black`]:color==='light',
+					[`text-black`]: isLight && color === 'light',
 					[`rounded${rounded !== 'default' ? `-${rounded}` : ''}`]: rounded,
 					'rounded-0':
 						rounded === 'bottom' ||

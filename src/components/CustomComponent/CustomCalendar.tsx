@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import dayjs from 'dayjs';
 import { Calendar, dayjsLocalizer, Views } from 'react-big-calendar';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
@@ -40,10 +40,21 @@ const CustomCalendar = ({
 	endAccessor = 'end',
 	toolbar = false,
 }: CustomCalendarProps) => {
+	const lastDateClickRef = useRef<{ key: string; at: number } | null>(null);
+
 	/** Normalize to the calendar day in local time (avoids UTC shift from RBC / ISO dates). */
 	const emitDateClick = (rawDate: Date) => {
 		if (!rawDate || Number.isNaN(rawDate.getTime())) return;
 		const normalized = new Date(rawDate.getFullYear(), rawDate.getMonth(), rawDate.getDate());
+		const key = dayjs(normalized).format('YYYY-MM-DD');
+		const now = Date.now();
+		if (
+			lastDateClickRef.current?.key === key &&
+			now - lastDateClickRef.current.at < 250
+		) {
+			return;
+		}
+		lastDateClickRef.current = { key, at: now };
 		onDateClick?.(normalized);
 	};
 
@@ -63,7 +74,6 @@ const CustomCalendar = ({
 		const text = String(event?.title || '');
 		const lines = text.split('\n').filter(Boolean);
 		const [primary, ...detailLines] = lines;
-		const detail = detailLines.join(' · ');
 
 		if (event?.resource?.kind === 'shift') {
 			const accent = String(event?.color || '#495057');
@@ -76,20 +86,45 @@ const CustomCalendar = ({
 						color: accent,
 					}}>
 					{primary && <span className='rbc-shift-event-card__name'>{primary}</span>}
-					{detail && <span className='rbc-shift-event-card__detail'>{detail}</span>}
+					{detailLines.map((line, index) => (
+						<span key={index} className='rbc-shift-event-card__detail'>
+							{line}
+						</span>
+					))}
 				</span>
 			);
 		}
+
+		const workedLineIndex = detailLines.findIndex((line) => /^Worked:/i.test(line.trim()));
+		const workedLine = workedLineIndex >= 0 ? detailLines[workedLineIndex] : null;
+		const otherDetails =
+			workedLineIndex >= 0
+				? detailLines.filter((_, index) => index !== workedLineIndex)
+				: detailLines;
+
 		return (
 			<span className='rbc-status-event-card' title={text.replace(/\n/g, ' ')}>
-				{primary && <span className='rbc-status-event-card__primary'>{primary}</span>}
-				{detail && <span className='rbc-status-event-card__detail'>{detail}</span>}
+				{(primary || workedLine) && (
+					<span className='rbc-status-event-card__row'>
+						{primary && <span className='rbc-status-event-card__primary'>{primary}</span>}
+						{workedLine && (
+							<span className='rbc-status-event-card__worked'>{workedLine}</span>
+						)}
+					</span>
+				)}
+				{otherDetails.map((line, index) => (
+					<span key={index} className='rbc-status-event-card__detail'>
+						{line}
+					</span>
+				))}
 			</span>
 		);
 	};
 
 	return (
-		<div className='schedule-calendar-grid' style={{ height, width: '100%' }}>
+		<div
+			className={`schedule-calendar-grid${onDateClick ? ' schedule-calendar-grid--clickable' : ''}`}
+			style={{ height, width: '100%' }}>
 			<Calendar
 				localizer={localizer}
 				toolbar={toolbar}
@@ -120,17 +155,22 @@ const CustomCalendar = ({
 						emitDateClick(slotInfo.start);
 					}
 				}}
+				onSelectEvent={(event: any) => {
+					if (event?.start) {
+						emitDateClick(event.start);
+					}
+				}}
 				/**
-				 * Keep events visible but let day-cell clicks pass through.
-				 * This ensures dates stay clickable even when cells are filled by schedules.
+				 * When date clicks are enabled, events are interactive; otherwise clicks pass through to the day cell.
 				 */
 				eventPropGetter={(event: any) => {
 					const custom = eventPropGetterProp?.(event) || {};
 					return {
 						...custom,
 						style: {
-							pointerEvents: 'none',
 							...(custom.style || {}),
+							pointerEvents: onDateClick ? 'auto' : 'none',
+							cursor: onDateClick ? 'pointer' : undefined,
 						},
 					};
 				}}

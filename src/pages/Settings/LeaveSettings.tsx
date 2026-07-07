@@ -257,12 +257,12 @@ const LeaveSettings: FC = () => {
 						/>
 					</div>
 
-					<div className='col-12'>
+					{/* <div className='col-12'>
 						<hr className='my-1 mt-5' />
 						<p className='text-warning fs-5 fw-semibold mb-0 mt-5 mb-5'>Attendance GPS</p>
-					</div>
+					</div> */}
 
-<div className='row'>
+                 {/* <div className='row'>
 					<div className='col-md-6'>
 						<FormGroup label='Geofence radius (meters) *'>
 							<input
@@ -286,7 +286,7 @@ const LeaveSettings: FC = () => {
 							)}
 						</FormGroup>
 					</div>
-</div>
+					</div>
 					<div className='col-md-6'>
 						<CheckboxWithLabel
 							control={control}
@@ -303,7 +303,7 @@ const LeaveSettings: FC = () => {
 							label='Strict GPS validation'
 							layout='form-field'
 						/>
-					</div>
+					</div> */}
 				</div>
 			</CardBody>
 		</Card>

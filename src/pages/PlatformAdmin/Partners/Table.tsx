@@ -16,6 +16,11 @@ import Moments from '../../../helpers/Moment';
 import { buttonColor } from '../../../helpers/constants';
 import { swalFire } from '../../../helpers/swalHelper';
 
+const PARTNER_STATUS_ACTION_ENDPOINT = {
+	ACTIVE: 'unblock',
+	BLOCKED: 'block',
+} as const;
+
 const PartnersTable = ({ tableRef, urlBackup }: any) => {
 	const navigate = useNavigate();
 	const [filterEnabled, setFilterEnabled] = useState(false);
@@ -45,8 +50,9 @@ const PartnersTable = ({ tableRef, urlBackup }: any) => {
 				if (!result.isConfirmed || !row?.id) return;
 
 				setStatusUpdatingId(row.id);
+				const action = PARTNER_STATUS_ACTION_ENDPOINT[status];
 				authAxios
-					.patch(`api/partners/${row.id}/`, { status })
+					.post(`api/partners/${row.id}/${action}/`, { status })
 					.then((response) => {
 						tableRef?.current?.onQueryChange?.();
 						const message =
@@ -298,12 +304,8 @@ const PartnersTable = ({ tableRef, urlBackup }: any) => {
 		</div>
 	);
 };
-
-/* eslint-disable react/forbid-prop-types */
 PartnersTable.propTypes = {
 	tableRef: PropTypes.object.isRequired,
 	urlBackup: PropTypes.object.isRequired,
 };
-/* eslint-enable react/forbid-prop-types */
-
 export default PartnersTable;

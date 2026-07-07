@@ -10,9 +10,8 @@ const UserDetailSkeleton: React.FC = () => {
 	return (
 		<div className='ud-skeleton-page'>
 			<div className='row g-4 align-items-stretch'>
-				<div className='col-12 col-lg-6 mb-4 d-flex flex-column'>
-					{/* User profile card */}
-					<div className='ud-skeleton-card mb-4'>
+				<div className='col-12 col-lg-6 d-flex'>
+					<div className='ud-skeleton-card w-100'>
 						<div className='ud-skeleton-profile-row mb-4'>
 							<div className='ud-skeleton-avatar ud-skeleton-shimmer' />
 							<div className='flex-grow-1 min-w-0'>
@@ -29,24 +28,10 @@ const UserDetailSkeleton: React.FC = () => {
 							))}
 						</div>
 					</div>
-
-					{/* Today info card */}
-					<div className='ud-skeleton-card flex-grow-1'>
-						<div className='ud-skeleton-line ud-skeleton-line--today-title ud-skeleton-shimmer mb-4' />
-						<div className='ud-skeleton-today-grid'>
-							{Array.from({ length: TODAY_TILES_COUNT }).map((_, index) => (
-								<div key={index} className='ud-skeleton-today-tile'>
-									<div className='ud-skeleton-line ud-skeleton-line--label ud-skeleton-shimmer mb-2' />
-									<div className='ud-skeleton-chip ud-skeleton-shimmer' />
-								</div>
-							))}
-						</div>
-					</div>
 				</div>
 
-				<div className='col-12 col-lg-6 mb-4 d-flex flex-column'>
-					{/* Documents card */}
-					<div className='ud-skeleton-card ud-skeleton-documents-card'>
+				<div className='col-12 col-lg-6 d-flex'>
+					<div className='ud-skeleton-card ud-skeleton-documents-card w-100'>
 						<div className='ud-skeleton-panel-header'>
 							<div className='ud-skeleton-line ud-skeleton-line--panel-title ud-skeleton-shimmer' />
 							<div className='ud-skeleton-button ud-skeleton-shimmer' />
@@ -66,9 +51,33 @@ const UserDetailSkeleton: React.FC = () => {
 						))}
 					</div>
 				</div>
+			</div>
 
+			<div className='row g-4 align-items-stretch mt-0'>
+				<div className='col-12 col-lg-6 d-flex'>
+					<div className='ud-skeleton-card w-100'>
+						<div className='ud-skeleton-line ud-skeleton-line--today-title ud-skeleton-shimmer mb-4' />
+						<div className='ud-skeleton-today-grid'>
+							{Array.from({ length: TODAY_TILES_COUNT }).map((_, index) => (
+								<div key={index} className='ud-skeleton-today-tile'>
+									<div className='ud-skeleton-line ud-skeleton-line--label ud-skeleton-shimmer mb-2' />
+									<div className='ud-skeleton-chip ud-skeleton-shimmer' />
+								</div>
+							))}
+						</div>
+					</div>
+				</div>
+				<div className='col-12 col-lg-6 d-flex'>
+					<div className='ud-skeleton-card w-100'>
+						<div className='ud-skeleton-line ud-skeleton-line--today-title ud-skeleton-shimmer mb-4' />
+						<div className='ud-skeleton-line ud-skeleton-line--value ud-skeleton-shimmer mb-2' />
+						<div className='ud-skeleton-line ud-skeleton-line--value ud-skeleton-shimmer' />
+					</div>
+				</div>
+			</div>
+
+			<div className='row g-4 mt-0'>
 				<div className='col-12'>
-					{/* Monthly schedule calendar card */}
 					<div className='ud-skeleton-card'>
 						<div className='ud-skeleton-panel-header'>
 							<div className='ud-skeleton-line ud-skeleton-line--panel-title ud-skeleton-shimmer' />
